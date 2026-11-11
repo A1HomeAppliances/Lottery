@@ -93,8 +93,8 @@ The wheel has **36 sectors**. Each sector has an equal chance of being selected.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/<repository-name>.git
-cd <repository-name>
+git clone https://github.com/CAgent47/Lottery.git
+cd Lottery
 ```
 
 ### 2. (Recommended) Create a virtual environment
