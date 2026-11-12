@@ -55,14 +55,13 @@ DATABASE_PATH = Path(__file__).resolve().with_name("lottery.db")
 POOCH = "pooch"  # formerly "پوچ"
 
 GIFTS = [
-    "crystal", "pooch", "chini", "pooch", "bloor", "pooch",
-    "gold coin", "pooch", "wall clock", "pooch", "wall clock", "pooch",
-    "carpet frame", "pooch", "wall clock", "pooch", "wall clock", "pooch",
-    "crystal", "pooch", "chini", "pooch", "bloor", "pooch",
-    "gold coin", "pooch", "wall clock", "pooch", "wall clock", "pooch",
-    "carpet frame", "pooch", "wall clock", "pooch", "wall clock", "pooch",
+    "Crystal", "Pooch", "Chini", "Pooch", "Bloor", "Tablo Farsh",
+    "Sekke Tala", "Pooch", "Sa'at Divari", "Pooch", "Sa'at Divari", "Crystal",
+    "Tablo Farsh", "Pooch", "Sa'at Divari", "Pooch", "Sa'at Divari", "Pooch",
+    "Crystal", "Pooch", "Chini", "Pooch", "Bloor", "Tablo Farsh",
+    "Sekke Tala", "Pooch", "Sa'at Divari", "Pooch", "Sa'at Divari", "Crystal",
+    "Tablo Farsh", "Pooch", "Sa'at Divari", "Pooch", "Sa'at Divari", "Pooch",
 ]
-
 GOLD = get_color_from_hex("#F4C95D")
 GOLD_LIGHT = get_color_from_hex("#FFE7A3")
 BACKGROUND = get_color_from_hex("#0E0F1A")
@@ -787,13 +786,31 @@ class WheelScreen(BaseScreen):
 
 
 # ---------------------------------------------------------------------------
-# Result screen
+# Result screen + Confetti
 # ---------------------------------------------------------------------------
+
+class ConfettiParticle(Widget):
+    def __init__(self, x, y, color, **kwargs):
+        super().__init__(**kwargs)
+        self.pos = (x, y)
+        self.size = (dp(10), dp(15))
+        self._color = color
+        with self.canvas:
+            Color(*self._color)
+            self._rect = Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self._update, size=self._update)
+
+    def _update(self, *_):
+        self._rect.pos = self.pos
+        self._rect.size = self.size
+
 
 class ResultScreen(BaseScreen):
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
         self.app_ref = app
+        self.confetti_widgets = []
+        self.confetti_event = None
 
         root = BoxLayout(
             orientation="vertical", padding=[dp(28), dp(28), dp(28), dp(28)], spacing=dp(14),
@@ -801,7 +818,7 @@ class ResultScreen(BaseScreen):
 
         root.add_widget(Widget(size_hint_y=0.4))
 
-        self.title_label = make_label("Congratulations!", 26, GOLD, True)
+        self.title_label = make_label("CONGRATULATIONS!", 26, GOLD, True)
         root.add_widget(self.title_label)
 
         self.subtitle_label = make_label("", 15, MUTED)
@@ -823,7 +840,7 @@ class ResultScreen(BaseScreen):
         root.add_widget(Widget(size_hint_y=0.3))
 
         self.again_button = make_button(
-            "Play again with a new invoice", self.logout,
+            "PLAY AGAIN WITH A NEW INVOICE", self.logout,
             height=58, font_size=16,
         )
         root.add_widget(self.again_button)
@@ -833,33 +850,87 @@ class ResultScreen(BaseScreen):
 
     def show_prize(self, name, prize):
         self.prize_label.text = prize.upper()
+        self.stop_confetti()  # پاک کردن کاغذهای قبلی
 
         if prize == POOCH:
             accent = (1, 1, 1, 0.18)
-            self.title_label.text = "Thanks for playing!"
+            self.title_label.text = "THANK YOU FOR PLAYING!"
             self.title_label.color = GOLD_LIGHT
-            self.subtitle_label.text = f"{name}, today wasn't your lucky day..."
-            self.message_label.text = "Every spin is a new memory. Thanks for being part of A1!"
+            self.subtitle_label.text = f"{name}, today may not be your day..."
+            self.message_label.text = "Every spin is a new memory. Thank you for being part of A1!"
             self.prize_label.color = MUTED
         else:
             prize_color = get_color_from_hex(PRIZE_COLORS[prize])
             accent = (prize_color[0], prize_color[1], prize_color[2], 1)
-            self.title_label.text = "Congratulations!"
+            self.title_label.text = "CONGRATULATIONS!"
             self.title_label.color = GOLD
             self.subtitle_label.text = f"{name}, you are a winner!"
             self.message_label.text = "Please contact the A1 team to claim your prize."
             self.prize_label.color = prize_color
+            
+            # شروع افکت کاغذ رنگی فقط اگر جایزه Pooch نباشه
+            self.start_confetti()
 
         self.prize_panel.set_border(accent)
         self.prize_label.opacity = 0
         Animation(opacity=1, duration=0.45).start(self.prize_label)
 
+    # ------------------- کدهای مربوط به کاغذ رنگی -------------------
+    def start_confetti(self):
+        self.stop_confetti()
+        # ساخت ۱۰۰ تا کاغذ رنگی در بالای صفحه
+        colors = [
+            GOLD, RED, 
+            get_color_from_hex("#29B6F6"), # آبی
+            get_color_from_hex("#AB47BC"), # بنفش
+            get_color_from_hex("#7CB342"), # سبز
+            get_color_from_hex("#FFC107")  # زرد
+        ]
+        
+        for _ in range(100):
+            x = random.uniform(0, Window.width)
+            y = Window.height + random.uniform(10, 300)
+            color = random.choice(colors)
+            p = ConfettiParticle(x, y, color)
+            self.add_widget(p)
+            self.confetti_widgets.append(p)
+
+        # آپدیت کردن موقعیتشون ۶۰ بار در ثانیه
+        self.confetti_event = Clock.schedule_interval(self.update_confetti, 1/60.0)
+
+    def update_confetti(self, dt):
+        finished = True
+        for p in self.confetti_widgets:
+            # سرعت سقوط و باد
+            speed_y = random.uniform(150, 350) * dt
+            speed_x = math.sin(Clock.get_time() * 3 + p.center_x) * 80 * dt
+            
+            p.y -= speed_y
+            p.x += speed_x
+            
+            # اگر کاغذ به پایین‌ترین نقطه رسید
+            if p.top > 0:
+                finished = False
+
+        if finished:
+            self.stop_confetti()
+            return False  # متوقف کردن تایمر
+        return True
+
+    def stop_confetti(self):
+        if self.confetti_event:
+            self.confetti_event.cancel()
+            self.confetti_event = None
+        for p in self.confetti_widgets:
+            self.remove_widget(p)
+        self.confetti_widgets.clear()
+    # ----------------------------------------------------------------
+
     def logout(self, *_):
+        self.stop_confetti()
         self.manager.get_screen("login").clear()
         self.manager.transition = FadeTransition(duration=0.4)
         self.manager.current = "login"
-
-
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
