@@ -52,7 +52,7 @@ from kivy.utils import get_color_from_hex, platform
 APP_TITLE = "A1 Lucky Spin"
 DATABASE_PATH = Path(__file__).resolve().with_name("lottery.db")
 
-POOCH = "pooch"  # formerly "پوچ"
+POOCH = "Pooch"  # formerly "پوچ"
 
 GIFTS = [
     "Crystal", "Pooch", "Chini", "Pooch", "Bloor", "Tablo Farsh",
