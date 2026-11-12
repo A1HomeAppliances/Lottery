@@ -791,9 +791,13 @@ class WheelScreen(BaseScreen):
 
 class ConfettiParticle(Widget):
     def __init__(self, x, y, color, **kwargs):
+        # این دو خط size_hint رو صفر می‌کنه تا کاغذها اندازه‌ی خودشون رو داشته باشن
+        kwargs['size_hint'] = (None, None) 
         super().__init__(**kwargs)
+        
         self.pos = (x, y)
-        self.size = (dp(10), dp(15))
+        # سایز کاغذها رو کوچیک کردم (۸ در ۱۲)
+        self.size = (dp(8), dp(12))
         self._color = color
         with self.canvas:
             Color(*self._color)
@@ -803,7 +807,6 @@ class ConfettiParticle(Widget):
     def _update(self, *_):
         self._rect.pos = self.pos
         self._rect.size = self.size
-
 
 class ResultScreen(BaseScreen):
     def __init__(self, app, **kwargs):
