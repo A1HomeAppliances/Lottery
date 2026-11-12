@@ -86,7 +86,7 @@ def sector_color(index):
     prize = GIFTS[index]
     if prize == POOCH:
         return get_color_from_hex(POOCH_COLORS[(index // 2) % 2])
-    return get_color_from_hex(PRIZE_COLORS.get(prize, #888888)
+    return get_color_from_hex(PRIZE_COLORS.get(prize, "#888888"))
 
 
 def text_color_for(rgba):
