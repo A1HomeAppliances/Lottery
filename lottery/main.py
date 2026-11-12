@@ -77,7 +77,7 @@ PRIZE_COLORS = {
     "bloor": "#26A69A",
     "gold coin": "#FFC107",
     "wall clock": "#EF5350",
-    "carpet frame": "#7CB342",
+    "carpet frame": "#7CB342"
 }
 POOCH_COLORS = ("#2E3354", "#232844")
 
