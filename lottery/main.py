@@ -72,12 +72,12 @@ MUTED = get_color_from_hex("#A9A8B8")
 RED = get_color_from_hex("#EF6F72")
 
 PRIZE_COLORS = {
-    "crystal": "#29B6F6",
-    "chini": "#AB47BC",
-    "bloor": "#26A69A",
-    "gold coin": "#FFC107",
-    "wall clock": "#EF5350",
-    "carpet frame": "#7CB342"
+    "Crystal": "#29B6F6",
+    "Chini": "#AB47BC",
+    "Bloor": "#26A69A",
+    "Sekke Tala": "#FFC107",
+    "Sa'at Divari": "#EF5350",
+    "Tablo Farsh": "#7CB342"
 }
 POOCH_COLORS = ("#2E3354", "#232844")
 
