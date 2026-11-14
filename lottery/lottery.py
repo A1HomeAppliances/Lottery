@@ -19,9 +19,10 @@ Notes:
 # Fixes the "/dev/input/event5" permission error that breaks typing on Linux.
 # ---------------------------------------------------------------------------
 from kivy.config import Config
-# Disable the problematic touchpad/mouse provider to allow normal typing
+from kivy.utils import platform
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
-
+if platform != "android":
+    Config.set('input', 'mouse', 'mouse,disable_multitouch')
 import math
 import random
 import re
