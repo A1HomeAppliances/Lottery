@@ -343,4 +343,4 @@ All rights reserved. Contact the owner for usage or redistribution permissions.
 
 ---
 
-[banner](banner.png)
+![banner](banner.png)
