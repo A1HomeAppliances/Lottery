@@ -340,3 +340,7 @@ This project is proprietary software created for A1 Home Appliances.
 All rights reserved. Contact the owner for usage or redistribution permissions.
 
 <!-- If you prefer an open-source license, replace this section with MIT / Apache-2.0 and add a LICENSE file. -->
+
+---
+
+![banner](banner.png)
