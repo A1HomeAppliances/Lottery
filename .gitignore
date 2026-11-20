@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# Buildozer / Android build
+lottery/.buildozer/
+lottery/bin/
+.buildozer/
+bin/
+
+# APK outputs
+lottery/*.apk
+lottery/*.apk.idsig
+*.apk
+*.apk.idsig
+
+# Databases
+lottery/*.db
+*.sqlite
+*.sqlite3
+
+# Private signing keys
+*.keystore
+*.jks
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
