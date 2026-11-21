@@ -18,36 +18,39 @@ Notes:
 # KIVY CONFIGURATION (MUST BE BEFORE OTHER KIVY IMPORTS)
 # Fixes the "/dev/input/event5" permission error that breaks typing on Linux.
 # ---------------------------------------------------------------------------
-from kivy.config import Config
-# Disable the problematic touchpad/mouse provider to allow normal typing
-Config.set('input', 'mouse', 'mouse,disable_multitouch')
+try:
+    from kivy.config import Config
+    # Disable the problematic touchpad/mouse provider to allow normal typing
+    Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
-import math
-import random
-import re
-import sqlite3
-from pathlib import Path
+    import math
+    import random
+    import re
+    import sqlite3
+    from pathlib import Path
 
-from kivy.animation import Animation
-from kivy.app import App
-from kivy.clock import Clock
-from kivy.core.text import Label as CoreLabel
-from kivy.core.window import Window
-from kivy.graphics import (
-    Color, Ellipse, Line, PopMatrix, PushMatrix, Rectangle, Rotate,
-    RoundedRectangle, Triangle,
-)
-from kivy.metrics import dp
-from kivy.properties import NumericProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.screenmanager import FadeTransition, Screen, ScreenManager
-from kivy.uix.textinput import TextInput
-from kivy.uix.widget import Widget
-from kivy.utils import get_color_from_hex, platform
+    from kivy.animation import Animation
+    from kivy.app import App
+    from kivy.clock import Clock
+    from kivy.core.text import Label as CoreLabel
+    from kivy.core.window import Window
+    from kivy.graphics import (
+        Color, Ellipse, Line, PopMatrix, PushMatrix, Rectangle, Rotate,
+        RoundedRectangle, Triangle,
+    )
+    from kivy.metrics import dp
+    from kivy.properties import NumericProperty
+    from kivy.uix.boxlayout import BoxLayout
+    from kivy.uix.button import Button
+    from kivy.uix.floatlayout import FloatLayout
+    from kivy.uix.gridlayout import GridLayout
+    from kivy.uix.label import Label
+    from kivy.uix.screenmanager import FadeTransition, Screen, ScreenManager
+    from kivy.uix.textinput import TextInput
+    from kivy.uix.widget import Widget
+    from kivy.utils import get_color_from_hex, platform
+except ImportError as err:
+    print(f"Error for input this library \n ERR: {err}")
 
 
 # ---------------------------------------------------------------------------
