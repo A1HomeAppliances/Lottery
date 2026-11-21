@@ -1,9 +1,9 @@
-/* A1 Lucky Spin - web UI (login -> wheel -> result)
+/* A1 Lucky Spin — رابط وب فارسی (ورود -> چرخ -> نتیجه)
  *
- * Talks to Python through call(method, params):
- *   - Android WebView (file://)  : location.hash = "rpc/<id>/<base64url json>",
- *                                  answer arrives in window.__rpcReply(id, json)
- *   - desktop dev server (http:) : fetch("/api")
+ * از طریق call(method, params) با پایتون حرف می‌زند:
+ *   - WebView اندروید (file://)  : location.hash = "rpc/<id>/<base64url json>"
+ *                                  پاسخ از طریق window.__rpcReply(id, json)
+ *   - dev server دسکتاپ (http:)  : fetch("/api")
  */
 (function () {
   "use strict";
@@ -27,7 +27,7 @@
       var p = pending; pending = null;
       clearTimeout(p.timer);
       try { p.resolve(JSON.parse(payload)); }
-      catch (e) { p.resolve({ ok: false, error: "Bad response." }); }
+      catch (e) { p.resolve({ ok: false, error: "پاسخ نامعتبر." }); }
     }
   };
 
@@ -38,14 +38,14 @@
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ m: method, p: params || {} })
         }).then(function (r) { return r.json(); }).then(resolve)
-          .catch(function () { resolve({ ok: false, error: "Connection error." }); });
+          .catch(function () { resolve({ ok: false, error: "خطای اتصال." }); });
         return;
       }
       var id = ++rpcId;
       var timer = setTimeout(function () {
         if (pending && pending.id === id) {
           pending = null;
-          resolve({ ok: false, error: "No response from the app. Please try again." });
+          resolve({ ok: false, error: "پاسخی از برنامه دریافت نشد. لطفاً دوباره تلاش کنید." });
         }
       }, 8000);
       pending = { id: id, resolve: resolve, timer: timer };
@@ -53,7 +53,7 @@
     });
   }
 
-  // one request at a time, so hash changes can never overwrite each other
+  // یک درخواست هم‌زمان، تا تغییرهای hash روی هم نیفتند
   function call(method, params) {
     chain = chain.then(function () { return rawCall(method, params); });
     return chain;
@@ -73,7 +73,7 @@
   /* =====================  login  ===================== */
   var form = $("#form"), errorEl = $("#error"), submitBtn = $("#submit");
 
-  function toAsciiDigits(s) {            // Persian / Arabic-Indic -> 0-9
+  function toAsciiDigits(s) {
     return s.replace(/[\u06F0-\u06F9]/g, function (c) { return c.charCodeAt(0) - 0x06F0; })
             .replace(/[\u0660-\u0669]/g, function (c) { return c.charCodeAt(0) - 0x0660; });
   }
@@ -112,12 +112,12 @@
       if (!r.ok) { setError(r.error); return null; }
       state.name = r.name; state.invoice = r.invoice;
       return ensureConfig().then(function (ok) {
-        if (!ok) { setError("Could not load the wheel. Please try again."); return; }
+        if (!ok) { setError("چرخ بارگذاری نشد. لطفاً دوباره تلاش کنید."); return; }
         prepareWheel();
         show("wheel");
       });
     }).then(function () { submitBtn.disabled = false; },
-            function () { submitBtn.disabled = false; setError("Something went wrong."); });
+            function () { submitBtn.disabled = false; setError("مشکلی پیش آمد."); });
   });
 
   function ensureConfig() {
@@ -132,17 +132,26 @@
     state.busy = false;
     stopSpin();
     clearForm();
+    var revealEl = $("#prizeReveal");
+    if (revealEl) revealEl.classList.remove("active"); // پاک کردن استیت انیمیشن
     show("login");
   }
 
   /* =====================  wheel drawing  ===================== */
   var wheel = $("#wheel"), wrap = $("#wheelWrap"), board = $("#board");
   var pointerEl = document.querySelector(".wheel-wrap .pointer");
-  var SANS = getComputedStyle(document.body).fontFamily;
+  var CANVAS_FONT = 'Vazirmatn, "Segoe UI", Tahoma, sans-serif';
 
   function rgb(hex) {
     var n = parseInt(hex.slice(1), 16);
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function shade(hex, amt) {
+    var c = rgb(hex);
+    function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+    return "rgb(" + clamp(c[0] + 255 * amt) + "," +
+                    clamp(c[1] + 255 * amt) + "," +
+                    clamp(c[2] + 255 * amt) + ")";
   }
   function sectorColor(i) {
     var cfg = state.cfg, g = cfg.gifts[i];
@@ -165,62 +174,112 @@
 
     var gifts = state.cfg.gifts, n = gifts.length, step = Math.PI * 2 / n;
     var cx = size / 2, cy = size / 2;
-    var outer = size / 2 - size * 0.03, rim = outer * 0.05, radius = outer - rim;
-    var top = -Math.PI / 2;               // sector 0 starts at 12 o'clock, clockwise
+    var outer = size / 2 - size * 0.03;
+    var rimWidth = outer * 0.055;
+    var rimInner = outer - rimWidth;
+    var innerAccent = outer * 0.04;
+    var radius = rimInner - innerAccent;
+    var top = -Math.PI / 2;
 
-    // gold rim + soft drop shadow
+    /* ۱) حلقهٔ طلایی بیرونی با گرادیان و سایه */
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,.28)"; ctx.shadowBlur = size * 0.035; ctx.shadowOffsetY = size * 0.012;
-    var g = ctx.createLinearGradient(0, 0, size, size);
-    g.addColorStop(0, "#F4D18A"); g.addColorStop(0.5, "#E8B85A"); g.addColorStop(1, "#C99A42");
-    ctx.fillStyle = g;
+    ctx.shadowColor = "rgba(0,0,0,.45)";
+    ctx.shadowBlur = size * 0.04;
+    ctx.shadowOffsetY = size * 0.015;
+    var rimGrad = ctx.createLinearGradient(0, 0, size, size);
+    rimGrad.addColorStop(0, "#F4D18A");
+    rimGrad.addColorStop(0.35, "#E8B85A");
+    rimGrad.addColorStop(0.7, "#C99A42");
+    rimGrad.addColorStop(1, "#8C6B2A");
+    ctx.fillStyle = rimGrad;
     ctx.beginPath(); ctx.arc(cx, cy, outer, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
-    // dark inner ring
-    ctx.fillStyle = "#121419";
-    ctx.beginPath(); ctx.arc(cx, cy, outer - Math.max(2, outer * 0.012), 0, Math.PI * 2); ctx.fill();
+    /* ۲) حلقهٔ تیرهٔ داخلی (بِوِل) */
+    ctx.fillStyle = "#0E1118";
+    ctx.beginPath(); ctx.arc(cx, cy, rimInner, 0, Math.PI * 2); ctx.fill();
 
-    // sectors
+    /* ۳) نوار نازک طلایی داخلی */
+    var accentGrad = ctx.createLinearGradient(0, 0, size, size);
+    accentGrad.addColorStop(0, "#E8B85A");
+    accentGrad.addColorStop(0.5, "#F4D18A");
+    accentGrad.addColorStop(1, "#C99A42");
+    ctx.fillStyle = accentGrad;
+    ctx.beginPath(); ctx.arc(cx, cy, rimInner, 0, Math.PI * 2); ctx.fill();
+
+    /* ۴) بستر تیرهٔ سکتورها */
+    ctx.fillStyle = "#0A0C11";
+    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
+
+    /* ۵) سکتورها با گرادیان شعاعی (عمق) */
     for (var i = 0; i < n; i++) {
-      ctx.fillStyle = sectorColor(i);
-      ctx.beginPath(); ctx.moveTo(cx, cy);
+      var base = sectorColor(i);
+      var grad = ctx.createRadialGradient(cx, cy, radius * 0.14, cx, cy, radius);
+      grad.addColorStop(0, shade(base, -0.20));
+      grad.addColorStop(0.55, base);
+      grad.addColorStop(1, shade(base, 0.10));
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
       ctx.arc(cx, cy, radius, top + i * step, top + (i + 1) * step);
-      ctx.closePath(); ctx.fill();
+      ctx.closePath();
+      ctx.fill();
     }
 
-    // hairline dividers
-    ctx.strokeStyle = "rgba(255,255,255,.10)"; ctx.lineWidth = Math.max(0.8, outer * 0.0025);
+    /* ۶) جداکنندهٔ نازک (از مرکز تا لبه) */
+    ctx.strokeStyle = "rgba(255,255,255,.10)";
+    ctx.lineWidth = Math.max(0.8, outer * 0.0025);
     for (i = 0; i < n; i++) {
       var a = top + i * step;
-      ctx.beginPath(); ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + radius * Math.cos(a), cy + radius * Math.sin(a)); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + radius * 0.08 * Math.cos(a), cy + radius * 0.08 * Math.sin(a));
+      ctx.lineTo(cx + radius * Math.cos(a), cy + radius * Math.sin(a));
+      ctx.stroke();
     }
 
-    // labels - flipped on the left half so they are never upside-down
-    var fs = Math.max(9, radius * 0.072);
-    ctx.font = "700 " + fs + "px " + SANS;
+    /* ۷) برچسب‌ها (فارسی، چرخیده و روی نیمهٔ چپ برگردانده) */
+    var fs = Math.max(10, radius * 0.075);
+    ctx.font = "700 " + fs + "px " + CANVAS_FONT;
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     for (i = 0; i < n; i++) {
       var mid = top + (i + 0.5) * step, col = sectorColor(i);
       ctx.save();
-      ctx.translate(cx + radius * 0.64 * Math.cos(mid), cy + radius * 0.64 * Math.sin(mid));
+      ctx.translate(cx + radius * 0.66 * Math.cos(mid), cy + radius * 0.66 * Math.sin(mid));
       ctx.rotate(mid + (Math.cos(mid) < 0 ? Math.PI : 0));
       ctx.fillStyle = labelColor(col);
       ctx.globalAlpha = gifts[i] === state.cfg.pooch ? 0.9 : 1;
+      ctx.shadowColor = "rgba(0,0,0,.4)";
+      ctx.shadowBlur = Math.max(1, fs * 0.18);
       ctx.fillText(gifts[i], 0, 0);
       ctx.restore();
     }
 
-    // rim dots (pegs)
-    var dr = outer - rim / 2, dot = Math.max(1.5, rim * 0.16);
-    ctx.fillStyle = "rgba(18,20,25,.9)";
+    /* ۸) میخ‌های طلایی روی رینگ */
+    var pegR = outer - rimWidth * 0.5;
+    var pegSize = Math.max(2.4, rimWidth * 0.24);
     for (i = 0; i < n; i++) {
       var b = top + i * step;
-      ctx.beginPath(); ctx.arc(cx + dr * Math.cos(b), cy + dr * Math.sin(b), dot, 0, Math.PI * 2); ctx.fill();
+      var px = cx + pegR * Math.cos(b);
+      var py = cy + pegR * Math.sin(b);
+      ctx.fillStyle = "rgba(0,0,0,.5)";
+      ctx.beginPath(); ctx.arc(px, py + 1, pegSize * 1.05, 0, Math.PI * 2); ctx.fill();
+      var pegGrad = ctx.createRadialGradient(
+        px - pegSize * 0.4, py - pegSize * 0.4, 0, px, py, pegSize
+      );
+      pegGrad.addColorStop(0, "#FFF6DE");
+      pegGrad.addColorStop(0.55, "#F4D18A");
+      pegGrad.addColorStop(1, "#8C6B2A");
+      ctx.fillStyle = pegGrad;
+      ctx.beginPath(); ctx.arc(px, py, pegSize, 0, Math.PI * 2); ctx.fill();
     }
+
+    /* ۹) هایلایت لبهٔ بیرونی */
+    ctx.strokeStyle = "rgba(255,255,255,.18)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, outer - 0.5, 0, Math.PI * 2); ctx.stroke();
   }
-   function fitWheel() {
+
+  function fitWheel() {
     if (state.view !== "wheel") return;
     var w = board.clientWidth;
     var pt = parseFloat(getComputedStyle(board).paddingTop) || 0;
@@ -228,7 +287,7 @@
     var s = Math.floor(Math.max(120, Math.min(w, h, 900)));
     wrap.style.setProperty("--wheel", s + "px");
     drawWheel();
-   }
+  }
   if (window.ResizeObserver) new ResizeObserver(fitWheel).observe(board);
   window.addEventListener("resize", fitWheel);
   window.addEventListener("orientationchange", function () {
@@ -236,12 +295,6 @@
   });
 
   /* =====================  spin — real physics  ===================== */
-  /*
-   * Wheel: constant angular deceleration (like a dry bearing)
-   *   d = v0^2 / (2 f)        -> v0 = 2 d / T,  f = 2 d / T^2
-   * Pointer: damped harmonic oscillator (spring + damper)
-   *   Each peg crossing the pointer applies an impulse scaled by wheel speed.
-   */
   var spinBtn = $("#spin"), backBtn = $("#back"), statusEl = $("#status");
 
   var SPIN = {
@@ -266,9 +319,9 @@
   }
 
   function prepareWheel() {
-    $("#welcome").textContent = "Welcome, " + state.name;
+    $("#welcome").textContent = "خوش آمدید، " + state.name;
     statusEl.textContent = "";
-    spinBtn.disabled = false; spinBtn.textContent = "Spin!";
+    spinBtn.disabled = false; spinBtn.textContent = "بچرخون!";
     backBtn.disabled = false;
     state.busy = false;
     resetRotation();
@@ -282,7 +335,6 @@
 
   function stepPointer(dt) {
     var p = POINTER;
-    // spring force: -k*x  (toward rest) minus damping: -c*v
     p.velocity += (-p.stiffness * p.angle - p.damping * p.velocity) * dt;
     p.angle += p.velocity * dt;
     if (p.angle > p.maxTilt) { p.angle = p.maxTilt; if (p.velocity > 0) p.velocity = 0; }
@@ -290,7 +342,6 @@
     if (Math.abs(p.angle) < 0.001 && Math.abs(p.velocity) < 0.01) {
       p.angle = 0; p.velocity = 0;
     }
-    // CSS rotate positive = tip left.  We want positive p.angle = tip right, so negate.
     var deg = -p.angle * 180 / Math.PI;
     if (pointerEl) pointerEl.style.transform = "translateX(-50%) rotate(" + deg.toFixed(2) + "deg)";
   }
@@ -307,13 +358,11 @@
       SPIN.velocity = 0;
     } else {
       var t = SPIN.elapsed;
-      // analytic: x(t) = v0*t - 0.5*f*t^2   (clamped at target)
       SPIN.angle = Math.min(SPIN.target, SPIN.v0 * t - 0.5 * SPIN.friction * t * t);
       SPIN.velocity = Math.max(0, SPIN.v0 - SPIN.friction * t);
     }
     wheel.style.transform = "rotate(" + SPIN.angle.toFixed(2) + "deg)";
 
-    // peg crossing -> pointer impulse
     var peg = Math.floor(SPIN.angle / SPIN.step);
     if (peg > SPIN.lastPeg) {
       var crossings = Math.min(peg - SPIN.lastPeg, 5);
@@ -338,7 +387,6 @@
     var step = 360 / state.cfg.gifts.length;
     SPIN.step = step;
 
-    // where the winning sector must end up so its centre sits under the pointer
     var target = (prizeIndex + 0.5) * step + (Math.random() * 0.76 - 0.38) * step;
     var offset = ((360 - target) % 360 + 360) % 360;
 
@@ -347,8 +395,8 @@
     var D = turns * 360 + offset;
 
     SPIN.target = D;
-    SPIN.v0 = 2 * D / T;             // initial velocity (deg/s)
-    SPIN.friction = 2 * D / (T * T); // constant deceleration (deg/s^2)
+    SPIN.v0 = 2 * D / T;
+    SPIN.friction = 2 * D / (T * T);
     SPIN.duration = T;
     SPIN.elapsed = 0;
     SPIN.lastPeg = 0;
@@ -366,20 +414,44 @@
     if (state.busy) return;
     state.busy = true;
     spinBtn.disabled = true; backBtn.disabled = true;
-    spinBtn.textContent = "Spinning...";
+    spinBtn.textContent = "در حال چرخش...";
     statusEl.textContent = "";
 
     call("spin", { invoice: state.invoice }).then(function (r) {
       if (!r.ok) {
         state.busy = false; backBtn.disabled = false;
-        spinBtn.textContent = "Used";
+        spinBtn.textContent = "استفاده‌شده";
         statusEl.textContent = r.error;
         return;
       }
+      
       SPIN.done = function () {
-        statusEl.textContent = "The wheel has stopped.";
-        setTimeout(function () { showResult(r.prize); }, 650);
+        statusEl.textContent = "چرخ ایستاد.";
+        
+        var isWin = r.prize !== state.cfg.pooch;
+        var revealEl = $("#prizeReveal");
+        var revealText = $("#revealPrizeText");
+        
+        revealText.textContent = isWin ? r.prize : "پوچ";
+        revealEl.classList.toggle("is-lose", !isWin);
+        
+        // تاخیر کوتاه تا کاربر ببیند چرخ کجا ایستاده است
+        setTimeout(function () {
+          revealEl.classList.add("active");
+          
+          // زمان نمایش جایزه (۱.۸ ثانیه)
+          setTimeout(function () {
+            revealEl.classList.remove("active");
+            
+            setTimeout(function () {
+              showResult(r.prize);
+            }, 450); // هماهنگ با زمان محو شدن CSS
+            
+          }, reduceMotion ? 800 : 1800);
+          
+        }, 600);
       };
+      
       startSpin(r.index);
     });
   });
@@ -397,13 +469,13 @@
     $("#r-note").hidden = win;
 
     if (win) {
-      $("#r-title").textContent = "Congratulations!";
-      $("#r-sub").textContent = state.name + ", you are a winner!";
-      $("#r-prize").textContent = prize.toUpperCase();
+      $("#r-title").textContent = "تبریک!";
+      $("#r-sub").textContent = state.name + " عزیز، شما برنده شدید!";
+      $("#r-prize").textContent = prize;
     } else {
-      $("#r-title").textContent = "Thank you for playing!";
-      $("#r-sub").textContent = state.name + ", today may not be your day...";
-      $("#r-prize").textContent = "No prize this time";
+      $("#r-title").textContent = "از بازی شما متشکریم!";
+      $("#r-sub").textContent = state.name + " عزیز، امروز روز شما نیست...";
+      $("#r-prize").textContent = "این بار برنده نشدید";
     }
     show("result");
     if (win && !reduceMotion) confetti.start();
@@ -460,4 +532,11 @@
 
   // warm the config in the background so the wheel opens instantly
   ensureConfig();
+
+  // اگر فونت با تأخیر لود شد، چرخ را دوباره بکش تا برچسب‌ها با فونت فارسی رندر شوند
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      if (state.view === "wheel") drawWheel();
+    }).catch(function () {});
+  }
 })();

@@ -34,16 +34,16 @@ class Backend:
         fn = getattr(self, f"rpc_{method}", None) \
             if isinstance(method, str) and method.isidentifier() else None
         if fn is None or not callable(fn):
-            return _fail("Unknown request.")
+            return _fail("درخواست نامعتبر است.")
         try:
             with self._lock:
                 return fn(params if isinstance(params, dict) else {})
         except sqlite3.Error:
             log.exception("database error")
-            return _fail("Database error.")
+            return _fail("خطا در پایگاه داده.")
         except Exception:
             log.exception("unexpected error")
-            return _fail("Something went wrong.")
+            return _fail("مشکلی پیش آمد.")
 
     # ---- RPC methods ---------------------------------------------------
 
@@ -60,15 +60,15 @@ class Backend:
         invoice_raw = digits_only(p.get("invoice", ""))
 
         if not (first and last and phone_raw and invoice_raw):
-            return _fail("Please fill in all fields.")
+            return _fail("لطفاً همهٔ فیلدها را پر کنید.")
 
         phone = normalize_phone(phone_raw)
         if phone is None:
-            return _fail("Invalid mobile number (e.g. 09123456789).")
+            return _fail("شمارهٔ موبایل نامعتبر است (نمونه: 09123456789).")
 
         invoice = int(invoice_raw) if len(invoice_raw) <= 12 else 0
         if not 0 < invoice < 10 ** 12:
-            return _fail("Invoice number must be a positive integer.")
+            return _fail("شمارهٔ فاکتور باید یک عدد صحیح مثبت باشد.")
 
         try:
             row = self.db.register_invoice(first, last, phone, invoice)
@@ -77,8 +77,8 @@ class Backend:
 
         if row["lottery_check"] == 1:
             return _fail(
-                f"Invoice already used (result: {row['prize'] or POOCH}). "
-                "Enter a new invoice number."
+                f"این فاکتور قبلاً استفاده شده است (نتیجه: {row['prize'] or POOCH}). "
+                "شمارهٔ فاکتور جدیدی وارد کنید."
             )
         return {"ok": True, "name": first, "invoice": invoice}
 
@@ -86,12 +86,12 @@ class Backend:
         invoice = int(digits_only(p.get("invoice", "")) or 0)
         row = self.db.get_invoice(invoice)
         if row is None or row["lottery_check"] == 1:
-            return _fail("This invoice has already been used.")
+            return _fail("این فاکتور قبلاً استفاده شده است.")
 
         index = _rng.randrange(len(GIFTS))
         prize = GIFTS[index]
         if not self.db.mark_as_played(invoice, prize):
-            return _fail("This invoice has already been used.")
+            return _fail("این فاکتور قبلاً استفاده شده است.")
         return {"ok": True, "index": index, "prize": prize}
 
     def rpc_exit(self, _p):

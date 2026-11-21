@@ -124,7 +124,7 @@ class LotteryDatabase:
             )
         elif row["phone"] != phone:
             raise ValueError(
-                "This invoice number is already registered to another customer."
+                "این شمارهٔ فاکتور قبلاً برای مشتری دیگری ثبت شده است."
             )
 
         self.connection.commit()

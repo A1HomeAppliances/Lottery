@@ -1,6 +1,21 @@
-/* A1 Lucky Spin - "Dark Luxury Casino" design system
- * Fully responsive, NO-SCROLL layout at any viewport size.
- */
+/* A1 Lucky Spin — طرح «کازینوی لوکس تاریک» — فارسی / RTL / Vazirmatn */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Regular.woff2") format("woff2"),
+       url("../assets/fonts/Vazirmatn-Regular.ttf")   format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"),
+       url("../assets/fonts/Vazirmatn-Bold.ttf")   format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #0B0D12;
   --panel: #131720;
@@ -23,8 +38,8 @@
   --r-input: 14px;
   --shadow-card: 0 1px 0 rgba(255,255,255,.03) inset, 0 10px 32px rgba(0,0,0,.32);
   --shadow-btn: 0 6px 20px rgba(232, 184, 90, .16);
-  --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+  --sans: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, Tahoma, "Helvetica Neue", Arial, sans-serif;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
@@ -34,17 +49,16 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ---- NO PAGE SCROLL ---- */
 html, body {
   height: 100%;
   margin: 0;
   overflow: hidden;
   overscroll-behavior: none;
 }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
-  font: 400 1rem/1.5 var(--sans);
+  font: 400 1rem/1.7 var(--sans);
   color: var(--text);
   background:
     radial-gradient(70% 55% at 0% 0%, var(--glow-purple), transparent 70%),
@@ -65,7 +79,7 @@ input { -webkit-user-select: text; user-select: text; }
   max-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;    /* NO SCROLL */
+  overflow: hidden;
 }
 .view {
   flex: 1 1 0;
@@ -83,7 +97,12 @@ input { -webkit-user-select: text; user-select: text; }
 
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
-h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
+h1, h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -.005em;
+}
 
 .card {
   margin: 0;
@@ -100,7 +119,8 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   min-height: clamp(44px, 6.5vh, 52px);
   padding: 0 20px;
   border: 1px solid transparent; border-radius: var(--r-btn);
-  font: 600 clamp(.9rem, 2.2vh, 1rem)/1 var(--sans); letter-spacing: .005em;
+  font: 700 clamp(.9rem, 2.2vh, 1rem)/1.2 var(--sans);
+  letter-spacing: .005em;
   background: linear-gradient(180deg, var(--gold-light), var(--gold));
   color: var(--bg);
   box-shadow: var(--shadow-btn);
@@ -112,13 +132,13 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 .btn:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
 .btn.ghost {
   background: var(--panel-2); color: var(--text);
-  border-color: var(--hair); font-weight: 500;
+  border-color: var(--hair); font-weight: 400;
   box-shadow: none;
 }
 .btn.ghost:hover { background: var(--panel-3); filter: none; }
 .btn.ghost:active { box-shadow: none; }
 
-/* ============ LOGIN ============ */
+/* ============ ورود ============ */
 .login {
   flex: 1 1 0;
   min-height: 0;
@@ -136,13 +156,25 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 }
 .brand { text-align: center; }
 .brand h1 {
-  font-size: clamp(1.6rem, 4.8vh, 2.6rem);
-  line-height: 1.1; color: var(--gold); letter-spacing: .005em;
+  font-size: clamp(1.7rem, 5vh, 2.7rem);
+  line-height: 1.25; color: var(--gold); letter-spacing: -.01em;
+  display: inline-flex; align-items: center; gap: .35em;
+}
+.brand-mark {
+  display: inline-grid; place-items: center;
+  padding: 0 .42em;
+  border-radius: .3em;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  color: var(--bg);
+  font-size: .68em;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: 0 3px 10px rgba(232,184,90,.25);
 }
 .brand p {
-  margin: clamp(4px, .8vh, 8px) 0 0;
+  margin: clamp(6px, 1vh, 10px) 0 0;
   color: var(--muted);
-  font-size: clamp(.8rem, 1.8vh, .95rem);
+  font-size: clamp(.82rem, 1.9vh, .98rem);
   letter-spacing: .03em;
 }
 
@@ -157,11 +189,11 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 .form > #error,
 .form > #submit { grid-column: 1 / -1; }
 
-.field { display: grid; gap: 4px; min-width: 0; }
+.field { display: grid; gap: 6px; min-width: 0; }
 .field span {
   color: var(--muted);
-  font-size: clamp(.72rem, 1.5vh, .85rem);
-  letter-spacing: .01em;
+  font-size: clamp(.74rem, 1.6vh, .87rem);
+  letter-spacing: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .field input {
@@ -173,6 +205,7 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   border: 1px solid var(--hair); border-radius: var(--r-input);
   caret-color: var(--gold);
   outline: 0; -webkit-appearance: none; appearance: none;
+  text-align: right;
   transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
 .field input::placeholder { color: var(--muted-2); }
@@ -184,7 +217,7 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 }
 .error {
   margin: 0;
-  min-height: 1.3em;
+  min-height: 1.4em;
   text-align: center;
   color: var(--red);
   font-size: clamp(.8rem, 1.8vh, .92rem);
@@ -197,7 +230,7 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   letter-spacing: .02em;
 }
 
-/* ============ WHEEL ============ */
+/* ============ چرخ ============ */
 #view-wheel { flex: 1 1 0; min-height: 0; }
 .wheel-layout {
   flex: 1; min-height: 0;
@@ -215,11 +248,12 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 .w-head { grid-area: head; text-align: center; }
 .w-head h2 {
   font-size: clamp(1.15rem, 3.8vh, 1.6rem);
-  color: var(--gold); line-height: 1.2; overflow-wrap: anywhere;
+  color: var(--gold); line-height: 1.3; overflow-wrap: anywhere;
 }
 .w-head p { margin: 2px 0 0; color: var(--muted); font-size: clamp(.75rem, 1.6vh, .85rem); }
 
 .board {
+  position: relative; /* اضافه شده برای لایه روی چرخ */
   grid-area: board; min-height: 0;
   display: grid; place-items: center;
   padding-top: clamp(20px, 3.5vh, 28px);
@@ -228,9 +262,10 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   --wheel: 300px;
   position: relative;
   width: var(--wheel); height: var(--wheel);
-  filter: drop-shadow(0 14px 36px rgba(0,0,0,.42));
+  filter: drop-shadow(0 18px 42px rgba(0,0,0,.55)) drop-shadow(0 0 24px rgba(232,184,90,.18));
 }
 #wheel { display: block; width: 100%; height: 100%; will-change: transform; }
+
 .pointer {
   position: absolute; z-index: 3;
   left: 50%; top: -18px;
@@ -239,24 +274,29 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   transform-origin: 50% 0;
   border-inline: clamp(9px, 2.2vh, 12px) solid transparent;
   border-top: clamp(24px, 5.5vh, 34px) solid var(--red);
-  filter: drop-shadow(0 3px 3px rgba(0,0,0,.35));
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,.45)) drop-shadow(0 0 6px rgba(230,108,112,.35));
   will-change: transform;
 }
+
 .hub {
   position: absolute; z-index: 2; left: 50%; top: 50%;
   width: 26%; aspect-ratio: 1;
   transform: translate(-50%, -50%);
   display: grid; place-items: center;
   border-radius: 50%;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 50% 35%, #232a3a 0%, #0B0D12 72%);
   box-shadow:
     0 0 0 clamp(3px, calc(var(--wheel) * .014), 6px) var(--gold),
-    0 0 0 calc(clamp(3px, calc(var(--wheel) * .014), 6px) + 1px) rgba(255,255,255,.06),
-    0 6px 14px rgba(0,0,0,.4);
-  font: 600 calc(var(--wheel) * .085)/1 var(--display);
+    0 0 0 calc(clamp(3px, calc(var(--wheel) * .014), 6px) + 2px) rgba(255,255,255,.08),
+    0 8px 22px rgba(0,0,0,.55),
+    inset 0 2px 4px rgba(255,255,255,.06),
+    inset 0 -2px 4px rgba(0,0,0,.5);
+  font: 700 calc(var(--wheel) * .09)/1 var(--display);
   color: var(--gold-light);
-  letter-spacing: .02em;
+  letter-spacing: .03em;
   pointer-events: none;
+  text-shadow: 0 1px 0 rgba(0,0,0,.6);
 }
 
 .controls {
@@ -267,7 +307,7 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 }
 .status {
   margin: 0;
-  min-height: 1.3em;
+  min-height: 1.4em;
   text-align: center;
   color: var(--muted);
   font-size: clamp(.82rem, 1.8vh, .95rem);
@@ -284,7 +324,7 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   .controls { align-self: start; width: 100%; }
 }
 
-/* ============ RESULT ============ */
+/* ============ نتیجه ============ */
 .result {
   flex: 1 1 0;
   min-height: 0;
@@ -300,10 +340,10 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
     max(clamp(14px, 4vw, 20px), var(--safe-l));
   overflow: hidden;
 }
-.hero { display: grid; justify-items: center; text-align: center; gap: clamp(4px, .8vh, 8px); }
+.hero { display: grid; justify-items: center; text-align: center; gap: clamp(6px, 1vh, 10px); }
 .hero h1 {
   font-size: clamp(1.35rem, 4.5vh, 2.6rem);
-  line-height: 1.15; color: var(--gold); text-wrap: balance;
+  line-height: 1.3; color: var(--gold); text-wrap: balance;
 }
 .lead { margin: 0; color: var(--muted); font-size: clamp(.82rem, 1.9vh, 1.1rem); }
 .stack { display: grid; gap: clamp(8px, 1.8vh, 14px); align-content: start; min-height: 0; }
@@ -326,15 +366,16 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   width: 100%; height: 100%;
   border-radius: 50%; background: var(--bg);
   box-shadow: inset 0 0 0 1px var(--hair);
-  font: 600 calc(var(--size) * .3)/1 var(--display);
+  font: 700 calc(var(--size) * .3)/1 var(--display);
   color: var(--gold-light);
 }
 
 .prize-card { text-align: center; padding: clamp(12px, 2vh, 26px) clamp(14px, 2.5vw, 20px); }
 .prize {
   margin: 0;
-  font: 500 clamp(1.15rem, 3.5vh, 2.1rem)/1.2 var(--display);
-  letter-spacing: .05em; color: var(--gold-light);
+  font: 700 clamp(1.15rem, 3.5vh, 2.1rem)/1.35 var(--display);
+  letter-spacing: 0;
+  color: var(--gold-light);
   overflow-wrap: anywhere;
 }
 
@@ -347,7 +388,7 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 }
 .ticket dl > div:last-child { border-bottom: 0; }
 .ticket dt { color: var(--muted); }
-.ticket dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.ticket dd { margin: 0; text-align: left; overflow-wrap: anywhere; }
 
 .steps h2 {
   margin-bottom: clamp(6px, 1vh, 10px);
@@ -375,8 +416,9 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   border: 1px solid var(--gold);
   color: var(--gold-light);
   font-size: clamp(.72rem, 1.6vh, .85rem);
+  font-weight: 700;
 }
-.note { color: var(--muted); text-align: center; font-size: clamp(.82rem, 1.8vh, 1rem); }
+.note { color: var(--muted); text-align: center; font-size: clamp(.82rem, 1.8vh, 1rem); line-height: 1.8; }
 
 .result[data-state="lose"] #r-steps { display: none; }
 .result[data-state="lose"] .medal .rim {
@@ -387,9 +429,59 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 .result[data-state="lose"] .hero h1 { color: var(--gold-light); }
 .result[data-state="lose"] .prize { color: var(--muted); }
 
-/* ============ RESPONSIVE / HEIGHT COMPACTION ============ */
+/* ============ انیمیشن نمایش جایزه ============ */
+.prize-reveal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
 
-/* Wide enough -> 2-column result + wider login */
+.prize-reveal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.prize-reveal-inner {
+  background: rgba(19, 23, 32, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid var(--gold);
+  padding: clamp(16px, 4vh, 32px) clamp(24px, 6vw, 48px);
+  border-radius: 24px;
+  box-shadow: 0 0 50px rgba(232, 184, 90, 0.35), inset 0 0 20px rgba(232, 184, 90, 0.15);
+  transform: scale(0.5) translateY(30px);
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+}
+
+.prize-reveal.active .prize-reveal-inner {
+  transform: scale(1.1) translateY(0);
+}
+
+.prize-reveal-inner span {
+  display: block;
+  font: 700 clamp(1.5rem, 5vh, 3rem)/1.2 var(--display);
+  color: var(--gold-light);
+  text-shadow: 0 0 20px rgba(232, 184, 90, 0.6);
+}
+
+/* حالت پوچ */
+.prize-reveal.is-lose .prize-reveal-inner {
+  border-color: var(--muted);
+  box-shadow: 0 0 30px rgba(146, 152, 168, 0.2);
+}
+.prize-reveal.is-lose .prize-reveal-inner span {
+  color: var(--muted);
+  text-shadow: none;
+}
+
+/* ============ ریسپانسیو ============ */
 @media (min-width: 880px) and (min-height: 520px) {
   .result {
     width: min(100%, 1040px);
@@ -399,8 +491,6 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   }
   .login { width: min(100%, 520px); }
 }
-
-/* Short portrait (most phones) -> drop non-essential text */
 @media (max-height: 620px) {
   .brand p { display: none; }
   .foot { display: none; }
@@ -408,13 +498,11 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
 @media (max-height: 520px) {
   .login { gap: 8px; }
   .form { gap: 6px 8px; padding: 12px; }
-  .field { gap: 2px; }
+  .field { gap: 3px; }
   .field input { height: clamp(38px, 6vh, 46px); }
   .btn { min-height: 44px; }
   .error { min-height: 1.1em; }
 }
-
-/* Result: hide long text on short screens */
 @media (max-height: 720px) and (max-width: 879px) {
   .steps { display: none; }
 }
@@ -422,8 +510,6 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   .note { display: none; }
   .medal { --size: clamp(56px, 12vh, 100px); margin-bottom: 4px; }
 }
-
-/* Short landscape -> 2-column result even without width */
 @media (orientation: landscape) and (max-height: 560px) {
   .result {
     grid-template-columns: 1fr 1fr;
@@ -438,8 +524,6 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   .prize { font-size: clamp(1rem, 3vh, 1.4rem); }
   .ticket dl > div { padding: 4px 0; font-size: .85rem; }
 }
-
-/* Very tight landscape (phone landscape, nav bar visible) */
 @media (orientation: landscape) and (max-height: 400px) {
   .w-head p { display: none; }
   .w-head h2 { font-size: 1rem; }
@@ -453,8 +537,6 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   .btn { min-height: 34px; font-size: .85rem; }
   .error { font-size: .75rem; }
 }
-
-/* Very short portrait (rare, small devices) */
 @media (max-height: 500px) and (orientation: portrait) {
   .w-head p { display: none; }
   .w-head h2 { font-size: 1rem; }
@@ -462,8 +544,6 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   .controls .btn { min-height: 40px; }
   .status { min-height: 1em; }
 }
-
-/* Large displays: tablet / desktop / TV */
 @media (min-width: 1600px) and (min-height: 900px) {
   html { font-size: 18px; }
   .login { width: min(100%, 580px); }
@@ -474,9 +554,9 @@ h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; }
   html { font-size: 20px; }
   .wheel-layout { max-width: 1400px; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .view:not([hidden]) { animation: none; }
   #confetti { display: none; }
   .btn { transition: none; }
+  .prize-reveal-inner { transition: none; transform: none; }
 }

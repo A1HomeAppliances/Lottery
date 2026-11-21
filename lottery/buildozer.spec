@@ -5,7 +5,7 @@ package.domain = com.a1
 source.dir = .
 # html/css/js = the web UI shown in the WebView.
 # "db" is intentionally NOT listed so your local test lottery.db is never shipped.
-source.include_exts = py,png,jpg,ttf,html,css,js,svg
+source.include_exts = py,png,jpg,ttf,html,css,js,svg,woff2,woff
 source.exclude_dirs = bin, .buildozer, __pycache__, .git
 source.exclude_patterns = *.bak, *.log, lottery.db, *.db
 version = 1.0

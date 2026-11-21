@@ -14,6 +14,12 @@ class Handler(SimpleHTTPRequestHandler):
 
     backend = None
 
+    def translate_path(self, path):
+        # دسترسی به پوشه‌ی assets که خارج از web است
+        if path.startswith("/assets/"):
+            return str(PROJECT_ROOT / path.lstrip("/"))
+        return super().translate_path(path)
+
     def do_POST(self):
         if self.path != "/api":
             self.send_error(404)
