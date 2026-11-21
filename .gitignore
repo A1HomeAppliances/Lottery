@@ -38,3 +38,7 @@ lottery/*.db
 # OS
 .DS_Store
 Thumbs.db
+
+# BACKUPS
+lottery/backup2/
+lottery/bakup/
