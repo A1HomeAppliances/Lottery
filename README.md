@@ -9,6 +9,7 @@ The app targets **Android** (a Kivy shell hosting a full-screen `WebView`) and
 also runs in a browser for **desktop preview**.
 
 ---
+**🚀Version 1.5.0 Is Commming...🚀**
 
 ## Architecture
 
