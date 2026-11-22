@@ -1,4 +1,4 @@
-# 🎡 A1 Lucky Spin
+# 🎡 A1 Lucky Spin (V1.0.0 BETA)
 
 > A touch-friendly **customer lottery (prize wheel)** application built for **A1 Home Appliances**, written in Python with Kivy.
 
