@@ -1,0 +1,2 @@
+# Desktop preview (python main.py) needs NO third-party packages.
+# The Android build gets kivy/pyjnius/android from buildozer.spec.

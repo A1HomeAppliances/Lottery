@@ -1,347 +1,282 @@
-# 🎡 A1 Lucky Spin (V1.0.0 BETA)
+# A1 Lucky Spin
 
-> A touch-friendly **customer lottery (prize wheel)** application built for **A1 Home Appliances**, written in Python with Kivy.
+A customer-facing lottery wheel for **A1**. A customer enters their name,
+mobile number and invoice number, then spins a 36-sector wheel to win a prize
+(or the "Pooch" consolation). Each invoice can be spun exactly **once** — this
+is enforced inside SQLite, not in the UI.
 
-Customers enter their details and invoice number, spin an animated prize wheel, and instantly see what they won. Every invoice can be played **only once**, and all results are stored locally in an SQLite database.
+The app targets **Android** (a Kivy shell hosting a full-screen `WebView`) and
+also runs in a browser for **desktop preview**.
 
 ---
 **🚀Version 1.5.0 Is Commming...🚀**
 
-## 📑 Table of Contents
+## Architecture
 
-- [Features](#-features)
-- [How It Works](#-how-it-works)
-- [Prizes & Probabilities](#-prizes--probabilities)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Usage Guide](#-usage-guide)
-- [Database](#-database)
-- [Customization](#-customization)
-- [Project Structure](#-project-structure)
-- [Building for Android](#-building-for-android-optional)
-- [Known Limitations](#-known-limitations)
-- [Credits](#-credits)
+Four layers, deliberately decoupled:
 
----
+| Layer | File(s) | Role |
+|---|---|---|
+| Application logic | `lottery/backend.py`, `core/*` | Pure Python, no Kivy/Android imports. Shared by Android and desktop. Testable standalone. |
+| Web UI | `lottery/web/*` | All rendering, input, spin physics and the RPC client. |
+| Android host | `lottery/shell.py`, `lottery/webbridge.py` | Kivy `App` + native `WebView` + hash-based RPC bridge. |
+| Desktop host | `lottery/dev_server.py` | Serves `web/` over `http://127.0.0.1:8765/` and the same RPC on `POST /api`. |
 
-## ✨ Features
+The only public entry point into the logic is:
 
-- 🎨 **Modern dark UI** with gold accents, glow effects, and rounded components
-- 🎡 **Custom-drawn prize wheel** (36 sectors) with decorative bulbs, hub, and a physical-looking pointer
-- 🌀 **Smooth spin animation** (6 full rotations with ease-out) and a pointer that wobbles and settles
-- 🔒 **One play per invoice** — enforced at the database level, so it can't be bypassed by restarting the app
-- 📱 **Mobile number validation & normalization** — supports Persian/Arabic digits and formats such as `0912…`, `912…`, `98912…`, `0098912…`
-- 💾 **Local SQLite storage** — no server or internet connection required
-- 🔄 **Automatic database migration** — adds missing columns and fixes legacy schemas on startup
-- 🖥️ **Cross-platform** — Windows, Linux, macOS, and Android (via Buildozer)
-- 📦 **Single-file application** — the entire app lives in `main.py`
-
----
-
-## 🧭 How It Works
-
-```
-┌──────────┐     ┌──────────────┐     ┌──────────────┐
-│  Login   │ ──► │  Wheel Spin  │ ──► │    Result    │
-│  Screen  │     │    Screen    │     │    Screen    │
-└──────────┘     └──────────────┘     └──────────────┘
-     ▲                                        │
-     └────────── Play again (new invoice) ────┘
+```python
+Backend.handle(method, params) -> dict
 ```
 
-1. **Login** — the customer enters first name, last name, mobile number, and invoice number.
-2. **Validation** — all fields are checked, the phone number is normalized, and the invoice is registered (or verified) in the database.
-3. **Spin** — a random sector is selected and the result is **saved to the database before the animation starts**, which prevents cheating by closing the app mid-spin.
-4. **Result** — the prize is displayed. Winners are asked to contact the A1 team to claim it.
+`main.py` picks the host automatically: if `ANDROID_ARGUMENT` is set (by
+`python-for-android`) it starts `ShellApp`, otherwise it starts
+`dev_server.main()`.
 
 ---
 
-## 🎁 Prizes & Probabilities
+## Directory layout
 
-The wheel has **36 sectors**. Each sector has an equal chance of being selected.
-
-| Prize          | Sectors | Probability |
-| -------------- | :-----: | :---------: |
-| Pooch (no win) |   18    |   50.00 %   |
-| Wall clock     |    8    |   22.22 %   |
-| Crystal        |    2    |    5.56 %   |
-| Chini          |    2    |    5.56 %   |
-| Bloor          |    2    |    5.56 %   |
-| Gold coin      |    2    |    5.56 %   |
-| Carpet frame   |    2    |    5.56 %   |
-
-> 💡 To change the odds, simply edit the `GIFTS` list in `main.py` (see [Customization](#-customization)).
-
----
-
-## 🛠 Tech Stack
-
-| Component | Technology                          |
-| --------- | ----------------------------------- |
-| Language  | Python 3.8+                         |
-| UI / GFX  | [Kivy](https://kivy.org/)           |
-| Database  | SQLite 3 (Python standard library)  |
+```
+lottery/
+├── backend.py          # shared RPC logic (no Kivy, no Android)
+├── main.py             # entry point (Android -> shell, else dev_server)
+├── shell.py            # Kivy App that hosts the WebView (Android)
+├── webbridge.py        # WebView <-> Python RPC bridge (Android)
+├── dev_server.py       # desktop preview HTTP server
+├── buildozer.spec      # Android build configuration
+├── requirements.txt    # desktop needs nothing extra
+├── core/
+│   ├── config.py       # GIFTS, POOCH, colors, paths
+│   ├── database.py     # SQLite persistence layer
+│   └── utils.py        # digits_only, normalize_phone
+└── web/
+    ├── index.html
+    ├── app.js
+    └── style.css
+```
 
 ---
 
-## 🚀 Getting Started
+## Running the desktop preview
 
-### Prerequisites
-
-- Python **3.8 or newer**
-- `pip`
-
-### 1. Clone the repository
+Requires **no third-party packages** — only the Python standard library.
 
 ```bash
-git clone https://github.com/CAgent47/Lottery.git
-cd Lottery
-```
-
-### 2. (Recommended) Create a virtual environment
-
-```bash
-# Linux / macOS
-python3 -m venv venv
-source venv/bin/activate
-
-# Windows (PowerShell)
-python -m venv venv
-venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
-
-```bash
-pip install kivy
-```
-
-### 4. Run the app
-
-```bash
+cd lottery
 python3 main.py
 ```
 
-On first launch, the `lottery.db` database file is created automatically next to `main.py`.
+- Serves `web/` from `http://127.0.0.1:8765/`.
+- Exposes the same RPC on `POST /api` (same JSON shape as the Android bridge).
+- Uses `lottery.db` next to the source tree.
+- Sends `Cache-Control: no-store` so edits in `web/` show up on refresh.
+- Opens the page in your default browser; Ctrl+C to stop.
 
 ---
 
-## 📖 Usage Guide
+## Building the Android APK
 
-### For the cashier / operator
+`buildozer.spec` pins:
 
-1. Launch the application.
-2. Enter the customer's **first name**, **last name**, **mobile number**, and **invoice number**.
-3. Press **Login**.
-4. Hand the device to the customer and let them press **Spin!**.
-5. After the result screen appears, press **Play again with a new invoice** to serve the next customer.
-
-### Validation rules
-
-| Field          | Rule                                                                 |
-| -------------- | -------------------------------------------------------------------- |
-| First / Last   | Required                                                             |
-| Mobile number  | Must be a valid Iranian mobile number (`09XXXXXXXXX`) after normalization |
-| Invoice number | Positive integer, fewer than 12 digits                               |
-
-### Error messages
-
-| Situation                                         | Behavior                                                |
-| ------------------------------------------------- | ------------------------------------------------------- |
-| Invoice already played                            | Shows the previous result and asks for a new invoice    |
-| Invoice registered with a different phone number  | Rejected: *"already registered to another customer"*   |
-| Database failure                                  | Asks the user to contact the system administrator       |
-
----
-
-## 🗄 Database
-
-The app uses a single SQLite file (`lottery.db`) with one table:
-
-```sql
-CREATE TABLE lottery (
-    factorID      INTEGER NOT NULL PRIMARY KEY,  -- Invoice number
-    username      TEXT,                          -- "First Last"
-    first_name    TEXT,
-    last_name     TEXT,
-    phone         TEXT,                          -- Normalized: 09XXXXXXXXX
-    lottery_check INTEGER NOT NULL DEFAULT 0,    -- 0 = not played, 1 = played
-    prize         TEXT NOT NULL DEFAULT 'pooch',
-    played_at     TEXT                           -- Local timestamp of the spin
-);
-```
-
-### Viewing the results
+- **Requirements:** `python3, sqlite3, kivy==2.3.1, pyjnius, android`
+- **Architectures:** `arm64-v8a`, `armeabi-v7a`
+- **API:** `android.api = 33`, `android.minapi = 24`, NDK `25b`
+- **p4a branch:** `develop`
+- **Permissions:** `INTERNET` only
 
 ```bash
-sqlite3 lottery.db "SELECT factorID, first_name, last_name, phone, prize, played_at FROM lottery WHERE lottery_check = 1;"
-```
-
-Or open `lottery.db` with [DB Browser for SQLite](https://sqlitebrowser.org/).
-
-### Listing only the winners
-
-```bash
-sqlite3 lottery.db "SELECT * FROM lottery WHERE lottery_check = 1 AND prize != 'pooch';"
-```
-
-### Automatic migrations
-
-On startup the app will:
-
-- Add any missing columns (`first_name`, `last_name`, `phone`, `played_at`) to older databases
-- Rebuild the table if a legacy `UNIQUE` constraint on `username` is detected
-
----
-
-## 🎛 Customization
-
-All settings are at the top of `main.py`.
-
-### Change prizes or probabilities
-
-Edit the `GIFTS` list. Each entry is one sector on the wheel — add more entries of a prize to make it more likely.
-
-```python
-GIFTS = [
-    "crystal", "pooch", "chini", "pooch", ...
-]
-```
-
-> If you add a **new prize name**, also add a color for it in `PRIZE_COLORS`.
-
-### Change colors
-
-```python
-GOLD       = get_color_from_hex("#F4C95D")
-BACKGROUND = get_color_from_hex("#0E0F1A")
-PANEL      = get_color_from_hex("#1A1C2B")
-
-PRIZE_COLORS = {
-    "crystal": "#29B6F6",
-    "gold coin": "#FFC107",
-    ...
-}
-```
-
-### Change the app title
-
-```python
-APP_TITLE = "A1 Lucky Spin"
-```
-
-### Change the database location
-
-```python
-DATABASE_PATH = Path(__file__).resolve().with_name("lottery.db")
-```
-
-### Change the spin duration / rotations
-
-In `WheelScreen.spin_wheel`:
-
-```python
-final_angle = current - delta - 360 * 6                      # number of full rotations
-animation = Animation(angle=final_angle, duration=5.8, t="out_quart")  # duration in seconds
-```
-
----
-
-## 📂 Project Structure
-
-```
-.
-├── main.py        # The entire application
-├── lottery.db     # Created automatically on first run
-└── README.md
-```
-
-### Inside `main.py`
-
-| Section                 | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| Kivy configuration      | Disables problematic touchpad provider (fixes `/dev/input/event*` errors on Linux) |
-| Configuration           | Title, DB path, prizes, color palette                                 |
-| Phone / digit helpers   | Persian/Arabic digit conversion and phone normalization               |
-| `LotteryDatabase`       | SQLite access, schema creation, migration, one-play enforcement       |
-| UI helpers              | `RoundedPanel`, `RoundedButton`, `StyledInput`, `BaseScreen`          |
-| `WheelWidget`           | Custom-drawn wheel (sectors, labels, bulbs, hub)                      |
-| `PointerWidget`         | Animated pointer (wobble & settle)                                    |
-| `LoginScreen`           | Form + validation                                                     |
-| `WheelScreen`           | Spin logic and animation                                              |
-| `ResultScreen`          | Prize / thank-you display                                             |
-| `LotteryApp`            | App entry point and screen manager                                    |
-
----
-
-## 📱 Building for Android (optional)
-
-The app can be packaged as an APK using [Buildozer](https://github.com/kivy/buildozer) (Linux or WSL recommended).
-
-```bash
-pip install buildozer
-buildozer init
-```
-
-In the generated `buildozer.spec`, set at least:
-
-```ini
-title = A1 Lucky Spin
-package.name = a1luckyspin
-package.domain = com.a1
-source.include_exts = py
-requirements = python3,kivy
-orientation = portrait
-```
-
-Then build:
-
-```bash
+cd lottery
 buildozer -v android debug
 ```
 
-The APK will be created in the `bin/` directory.
+KivyMD / Pillow / materialyoucolor / libthorvg are **no longer required** —
+the UI is HTML and Kivy only hosts the `WebView`. `sqlite3` is required.
 
-> ⚠️ On Android, the database is stored next to the app files. For production use, consider moving `DATABASE_PATH` to `App.user_data_dir` so data survives app updates.
+`buildozer.spec` **intentionally excludes** `lottery.db` and `*.db` from the
+package, and does not list `db` in `source.include_exts`, so a developer's
+local test database never ships in the APK.
 
----
-
-## ⚠️ Known Limitations
-
-- **No invoice verification:** any invoice number entered is accepted and registered automatically. The app does not check it against a real sales system.
-- **Local database only:** results are not synchronized between devices. Use one device per branch, or collect the `lottery.db` files manually.
-- **Phone validation is Iran-specific** (`09XXXXXXXXX`).
-- **No admin panel:** results must be read directly from the database.
-
-Pull requests addressing any of these are welcome.
+On Android the DB lives inside `App.user_data_dir` so it survives APK updates.
 
 ---
 
-## 🧪 Troubleshooting
+## The RPC bridge
 
-| Problem                                        | Solution                                                               |
-| ---------------------------------------------- | ---------------------------------------------------------------------- |
-| Cannot type in text fields on Linux            | Already handled by `Config.set('input', 'mouse', ...)` at the top of `main.py`. Keep it **above** all other Kivy imports. |
-| `ModuleNotFoundError: No module named 'kivy'`  | Run `pip install kivy` inside your active virtual environment.         |
-| Window looks too small / large                 | Adjust `Window.size` in `LotteryApp.build`.                            |
-| Want to let a customer play again with the same invoice (testing) | Delete the row or run `UPDATE lottery SET lottery_check = 0 WHERE factorID = <id>;` |
+The web UI uses one function:
+
+```js
+call(method, params) -> Promise<{ok, ...}>
+```
+
+How it is transported depends on the page URL (`location.protocol`):
+
+### Desktop (`http:` / `https:`)
+
+```js
+fetch("/api", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({m: method, p: params || {}})
+})
+```
+
+Requests are serialised (`chain = chain.then(...)`), so only one is in flight
+at a time.
+
+### Android (`file:`)
+
+The page sets `location.hash = "rpc/<id>/<base64url(json)>"`. `WebBridge`
+polls `WebView.getUrl()` five times a second, matches
+`#rpc/(\d+)/([A-Za-z0-9_-]*)$`, decodes the base64url payload, calls
+`backend.handle()`, and answers with:
+
+```js
+window.__rpcReply(id, JSON.stringify(result))
+```
+
+The page resolves the matching pending `Promise`. A `_last_id` guard means
+each hash is served only once. An **8-second timeout** surfaces a friendly
+error if the app thread is blocked.
+
+Why this design:
+
+- **No local HTTP server on Android** (no cleartext problem, no port
+  conflicts).
+- **No `@JavascriptInterface` Java subclass** (keeps the build simple).
+
+The Android hardware back button flows through:
+
+```
+Kivy _on_key(27) -> WebBridge.back() -> window.__back() in the page
+```
+
+`window.__back()` decides what to do based on the current view, and calls the
+`exit` RPC on the login screen, which asks `ShellApp` to stop.
 
 ---
 
-## 👤 Credits
+## RPC methods
 
-- **Developer:** CAgent_47
-- **Built for:** A1 Home Appliances
+All methods take a single dict and return either
+`{ "ok": true, ... }` or `{ "ok": false, "error": "..." }`.
+`Backend.handle` wraps each call in a `threading.Lock`, catches
+`sqlite3.Error` and any other exception, and turns them into a generic error
+message.
+
+| Method | Params | Returns |
+|---|---|---|
+| `config` | — | `gifts`, `pooch`, `prizeColors`, `poochColors` |
+| `register` | `first`, `last`, `phone`, `invoice` | `name`, `invoice` |
+| `spin` | `invoice` | `index`, `prize` |
+| `exit` | — | `ok` |
+
+- **`register`** trims and validates the names, normalises the phone via
+  `normalize_phone` (Iranian `09xxxxxxxxx`, accepts `+98`, `0098`, `98…`
+  prefixes and Persian/Arabic-Indic digits), strips non-digits from the
+  invoice, and inserts the row if the invoice is new. If the invoice already
+  belongs to another phone number it raises `ValueError`.
+- **`spin`** picks `_rng.randrange(len(GIFTS))` with `random.SystemRandom`
+  (unpredictable outcome), then `mark_as_played` performs an
+  `UPDATE ... WHERE lottery_check = 0` and checks `cursor.rowcount == 1`,
+  so a race between two spins resolves to exactly one winner.
+- **`exit`** is only used from the login screen by the Android back button.
+  `WebBridge` then schedules `ShellApp.stop()`.
 
 ---
 
-## 📄 License
+## Database
 
-This project is proprietary software created for A1 Home Appliances.
-All rights reserved. Contact the owner for usage or redistribution permissions.
+SQLite, one table, one file. Schema:
 
-<!-- If you prefer an open-source license, replace this section with MIT / Apache-2.0 and add a LICENSE file. -->
+```sql
+CREATE TABLE lottery (
+    factorID     INTEGER NOT NULL PRIMARY KEY,   -- invoice number
+    username     TEXT,                           -- "First Last"
+    first_name   TEXT,
+    last_name    TEXT,
+    phone        TEXT,
+    lottery_check INTEGER NOT NULL DEFAULT 0,
+    prize        TEXT NOT NULL DEFAULT 'Pooch',
+    played_at    TEXT
+);
+```
+
+`LotteryDatabase` migrates older tables on startup:
+
+- Adds any missing columns in `EXTRA_COLUMNS`
+  (`first_name`, `last_name`, `phone`, `played_at`).
+- If `username` still has a `UNIQUE` constraint from an older schema, it
+  rebuilds the table into the current shape.
+
+`mark_as_played` writes `played_at = datetime('now', 'localtime')` at the
+same time it flips `lottery_check` to `1`.
 
 ---
 
-![banner](banner.png)
+## Configuration
+
+Everything user-visible lives in `core/config.py`:
+
+- **`GIFTS`** — the 36 sector labels in clockwise order. `app.js` draws the
+  wheel generically from `config.gifts`, so any length works; the spin
+  code recomputes `SPIN.step = 360 / gifts.length` on each spin.
+- **`POOCH`** — label and default value for the "no prize" outcome.
+  Pooch sectors alternate between the two `POOCH_COLORS`.
+- **`PRIZE_COLORS`** — one accent colour per real prize, used **only** on
+  wheel sectors. The result screen uses the gold palette from `style.css`.
+- **`DB_FILENAME`, `WEB_DIR`, `PROJECT_ROOT`** — resolved relative to
+  `core/config.py`, so the same paths work on desktop and inside the APK.
+
+---
+
+## Design notes
+
+- **No page scroll.** `html, body { overflow: hidden }`, and every view is a
+  flex column that reflows by viewport height. `style.css` has dedicated
+  rules for short portrait, short landscape, and very tight landscape.
+- **Reduced motion.** `prefers-reduced-motion: reduce` shortens the spin,
+  disables confetti, and disables the view transition. Read once on load.
+- **Persian / Arabic-Indic digits.** Accepted in both `#phone` and
+  `#invoice`, converted to ASCII on the fly by `toAsciiDigits` in `app.js`
+  and by `_DIGIT_TABLE` in `core/utils.py`.
+- **No system font scaling on Android.**
+  `settings.setTextZoom(100)` ignores the user's Android font-size setting
+  so the wheel layout cannot overflow.
+- **WebView is debuggable.** `WebView.setWebContentsDebuggingEnabled(True)`
+  is left on so `chrome://inspect` works when needed.
+- **Wheel physics.** Constant angular deceleration
+  `x(t) = v0·t − ½·f·t²` drives the wheel; a damped harmonic oscillator
+  (`POINTER.stiffness`, `POINTER.damping`) drives the pointer, kicked by
+  each peg crossing. The winning sector's final resting offset is jittered
+  by up to `±0.38` of a sector so the pointer does not always stop dead
+  centre.
+- **View state is client-side only.** `state.cfg`, `state.name`,
+  `state.invoice` live in `app.js`. A process restart returns to the login
+  screen — nothing sensitive is stored on the device.
+- **Cache busting on desktop only.** `dev_server.py` adds
+  `Cache-Control: no-store`; on Android the assets are inside the APK, so
+  it is unnecessary.
+
+---
+
+## Testing the logic without a device
+
+Because `backend.py` and `core/*` import neither Kivy nor `android`, you can
+exercise the RPC directly:
+
+```python
+from backend import Backend
+
+b = Backend("/tmp/test-lottery.db")
+print(b.handle("config", {}))
+print(b.handle("register", {
+    "first": "Sara", "last": "Ahmadi",
+    "phone": "09123456789", "invoice": "12345",
+}))
+print(b.handle("spin", {"invoice": "12345"}))
+b.close()
+```
+
+`spin` on an already-used invoice returns
+`{"ok": False, "error": "This invoice has already been used."}` — no UI
+involved.

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0B0D12">
+  <title>چرخ شانس A1</title>
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <main id="app">
+
+    <!-- ============ ورود ============ -->
+    <section class="view" id="view-login" data-view="login">
+      <div class="login">
+        <header class="brand">
+          <h1>چرخ شانس <span class="brand-mark">A1</span></h1>
+          <p>قرعه‌کشی مشتریان</p>
+        </header>
+
+        <form id="form" class="card form" novalidate autocomplete="off">
+          <label class="field">
+            <span>نام</span>
+            <input id="first" name="first" type="text" autocomplete="given-name"
+                   autocapitalize="words" enterkeyhint="next" maxlength="60">
+          </label>
+          <label class="field">
+            <span>نام خانوادگی</span>
+            <input id="last" name="last" type="text" autocomplete="family-name"
+                   autocapitalize="words" enterkeyhint="next" maxlength="60">
+          </label>
+          <label class="field">
+            <span>شمارهٔ موبایل</span>
+            <input id="phone" name="phone" type="tel" inputmode="tel"
+                   autocomplete="tel" enterkeyhint="next" maxlength="16"
+                   dir="ltr" placeholder="09123456789">
+          </label>
+          <label class="field">
+            <span>شمارهٔ فاکتور</span>
+            <input id="invoice" name="invoice" type="text" inputmode="numeric"
+                   pattern="[0-9]*" enterkeyhint="go" maxlength="12" dir="ltr">
+          </label>
+
+          <p id="error" class="error" role="alert" aria-live="assertive"></p>
+          <button id="submit" class="btn" type="submit">ادامه</button>
+        </form>
+
+        <p class="foot">با آرزوی موفقیت</p>
+      </div>
+    </section>
+
+    <!-- ============ چرخ ============ -->
+    <section class="view" id="view-wheel" data-view="wheel" hidden>
+      <div class="wheel-layout">
+        <header class="w-head">
+          <h2 id="welcome">خوش آمدید</h2>
+          <p>چرخ شانس A1</p>
+        </header>
+
+        <div class="board" id="board">
+          <div class="wheel-wrap" id="wheelWrap">
+            <span class="pointer" aria-hidden="true"></span>
+            <canvas id="wheel" aria-label="گردونهٔ جوایز" role="img"></canvas>
+            <span class="hub" aria-hidden="true">A1</span>
+          </div>
+          
+          <!-- لایه انیمیشن نمایش جایزه -->
+          <div class="prize-reveal" id="prizeReveal" aria-hidden="true">
+            <div class="prize-reveal-inner">
+              <span id="revealPrizeText"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <p id="status" class="status" aria-live="polite"></p>
+          <button id="spin" class="btn" type="button">بچرخون!</button>
+          <button id="back" class="btn ghost" type="button">بازگشت</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ نتیجه ============ -->
+    <section class="view" id="view-result" data-view="result" hidden>
+      <div class="result" id="result">
+        <div class="hero" aria-live="polite">
+          <div class="medal" aria-hidden="true">
+            <span class="pointer"></span>
+            <span class="rim"><span class="core">A1</span></span>
+          </div>
+          <h1 id="r-title">تبریک!</h1>
+          <p id="r-sub" class="lead"></p>
+        </div>
+
+        <div class="stack">
+          <section class="card prize-card" aria-label="نتیجهٔ شما">
+            <p id="r-prize" class="prize"></p>
+          </section>
+
+          <section class="card ticket" aria-label="اطلاعات شما">
+            <dl>
+              <div><dt>نام</dt><dd id="r-name">-</dd></div>
+              <div><dt>فاکتور</dt><dd id="r-invoice" dir="ltr">-</dd></div>
+            </dl>
+          </section>
+
+          <section class="card steps" id="r-steps" aria-labelledby="steps-title">
+            <h2 id="steps-title">نحوهٔ دریافت جایزه</h2>
+            <ol>
+              <li>این صفحه را به تیم A1 نشان دهید.</li>
+              <li>شمارهٔ فاکتور خود را اعلام کنید.</li>
+              <li>جایزه را همان‌جا تحویل بگیرید.</li>
+            </ol>
+          </section>
+
+          <p id="r-note" class="card note" hidden>
+            هر چرخش یک خاطرهٔ تازه است. ممنون که همراه A1 هستید!
+          </p>
+
+          <button id="again" class="btn" type="button">بازی با فاکتور جدید</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
