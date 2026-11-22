@@ -5,6 +5,7 @@
 Customers enter their details and invoice number, spin an animated prize wheel, and instantly see what they won. Every invoice can be played **only once**, and all results are stored locally in an SQLite database.
 
 ---
+**🚀Version 1.5.0 Is Commming...🚀**
 
 ## 📑 Table of Contents
 
