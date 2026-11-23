@@ -280,3 +280,19 @@ b.close()
 `spin` on an already-used invoice returns
 `{"ok": False, "error": "This invoice has already been used."}` — no UI
 involved.
+
+---
+
+# Developers:
+
+**[CAgent_47](https://github.com/CAgent47)**
+
+**[Vesper](https://github.com/Dev-vesper)**
+
+---
+
+**Created For:**
+
+*A1 Home Appliances*
+
+![banner](banner.png)
