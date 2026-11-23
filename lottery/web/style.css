@@ -1,4 +1,3 @@
-/* A1 Lucky Spin — طرح «کازینوی لوکس تاریک» — فارسی / RTL / Vazirmatn */
 @font-face {
   font-family: "Vazirmatn";
   src: url("../assets/fonts/Vazirmatn-Regular.woff2") format("woff2"),
@@ -138,7 +137,7 @@ h1, h2 {
 .btn.ghost:hover { background: var(--panel-3); filter: none; }
 .btn.ghost:active { box-shadow: none; }
 
-/* ============ ورود ============ */
+/* ============ Login ============ */
 .login {
   flex: 1 1 0;
   min-height: 0;
@@ -230,7 +229,7 @@ h1, h2 {
   letter-spacing: .02em;
 }
 
-/* ============ چرخ ============ */
+/* ============ spin ============ */
 #view-wheel { flex: 1 1 0; min-height: 0; }
 .wheel-layout {
   flex: 1; min-height: 0;
@@ -253,7 +252,7 @@ h1, h2 {
 .w-head p { margin: 2px 0 0; color: var(--muted); font-size: clamp(.75rem, 1.6vh, .85rem); }
 
 .board {
-  position: relative; /* اضافه شده برای لایه روی چرخ */
+  position: relative;
   grid-area: board; min-height: 0;
   display: grid; place-items: center;
   padding-top: clamp(20px, 3.5vh, 28px);
@@ -324,7 +323,7 @@ h1, h2 {
   .controls { align-self: start; width: 100%; }
 }
 
-/* ============ نتیجه ============ */
+/* ============ Result ============ */
 .result {
   flex: 1 1 0;
   min-height: 0;
@@ -429,7 +428,7 @@ h1, h2 {
 .result[data-state="lose"] .hero h1 { color: var(--gold-light); }
 .result[data-state="lose"] .prize { color: var(--muted); }
 
-/* ============ انیمیشن نمایش جایزه ============ */
+/* ============ Show Animation ============ */
 .prize-reveal {
   position: absolute;
   inset: 0;
@@ -471,7 +470,6 @@ h1, h2 {
   text-shadow: 0 0 20px rgba(232, 184, 90, 0.6);
 }
 
-/* حالت پوچ */
 .prize-reveal.is-lose .prize-reveal-inner {
   border-color: var(--muted);
   box-shadow: 0 0 30px rgba(146, 152, 168, 0.2);
@@ -481,7 +479,7 @@ h1, h2 {
   text-shadow: none;
 }
 
-/* ============ ریسپانسیو ============ */
+/* ============ Responsive ============ */
 @media (min-width: 880px) and (min-height: 520px) {
   .result {
     width: min(100%, 1040px);
