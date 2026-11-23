@@ -1,10 +1,3 @@
-/* A1 Lucky Spin — رابط وب فارسی (ورود -> چرخ -> نتیجه)
- *
- * از طریق call(method, params) با پایتون حرف می‌زند:
- *   - WebView اندروید (file://)  : location.hash = "rpc/<id>/<base64url json>"
- *                                  پاسخ از طریق window.__rpcReply(id, json)
- *   - dev server دسکتاپ (http:)  : fetch("/api")
- */
 (function () {
   "use strict";
 
@@ -133,7 +126,7 @@
     stopSpin();
     clearForm();
     var revealEl = $("#prizeReveal");
-    if (revealEl) revealEl.classList.remove("active"); // پاک کردن استیت انیمیشن
+    if (revealEl) revealEl.classList.remove("active");
     show("login");
   }
 
@@ -181,7 +174,6 @@
     var radius = rimInner - innerAccent;
     var top = -Math.PI / 2;
 
-    /* ۱) حلقهٔ طلایی بیرونی با گرادیان و سایه */
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,.45)";
     ctx.shadowBlur = size * 0.04;
@@ -195,11 +187,9 @@
     ctx.beginPath(); ctx.arc(cx, cy, outer, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
-    /* ۲) حلقهٔ تیرهٔ داخلی (بِوِل) */
     ctx.fillStyle = "#0E1118";
     ctx.beginPath(); ctx.arc(cx, cy, rimInner, 0, Math.PI * 2); ctx.fill();
 
-    /* ۳) نوار نازک طلایی داخلی */
     var accentGrad = ctx.createLinearGradient(0, 0, size, size);
     accentGrad.addColorStop(0, "#E8B85A");
     accentGrad.addColorStop(0.5, "#F4D18A");
@@ -207,11 +197,10 @@
     ctx.fillStyle = accentGrad;
     ctx.beginPath(); ctx.arc(cx, cy, rimInner, 0, Math.PI * 2); ctx.fill();
 
-    /* ۴) بستر تیرهٔ سکتورها */
     ctx.fillStyle = "#0A0C11";
     ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
 
-    /* ۵) سکتورها با گرادیان شعاعی (عمق) */
+
     for (var i = 0; i < n; i++) {
       var base = sectorColor(i);
       var grad = ctx.createRadialGradient(cx, cy, radius * 0.14, cx, cy, radius);
@@ -226,7 +215,6 @@
       ctx.fill();
     }
 
-    /* ۶) جداکنندهٔ نازک (از مرکز تا لبه) */
     ctx.strokeStyle = "rgba(255,255,255,.10)";
     ctx.lineWidth = Math.max(0.8, outer * 0.0025);
     for (i = 0; i < n; i++) {
@@ -237,7 +225,6 @@
       ctx.stroke();
     }
 
-    /* ۷) برچسب‌ها (فارسی، چرخیده و روی نیمهٔ چپ برگردانده) */
     var fs = Math.max(10, radius * 0.075);
     ctx.font = "700 " + fs + "px " + CANVAS_FONT;
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -254,7 +241,6 @@
       ctx.restore();
     }
 
-    /* ۸) میخ‌های طلایی روی رینگ */
     var pegR = outer - rimWidth * 0.5;
     var pegSize = Math.max(2.4, rimWidth * 0.24);
     for (i = 0; i < n; i++) {
@@ -273,7 +259,6 @@
       ctx.beginPath(); ctx.arc(px, py, pegSize, 0, Math.PI * 2); ctx.fill();
     }
 
-    /* ۹) هایلایت لبهٔ بیرونی */
     ctx.strokeStyle = "rgba(255,255,255,.18)";
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.arc(cx, cy, outer - 0.5, 0, Math.PI * 2); ctx.stroke();
@@ -435,17 +420,15 @@
         revealText.textContent = isWin ? r.prize : "پوچ";
         revealEl.classList.toggle("is-lose", !isWin);
         
-        // تاخیر کوتاه تا کاربر ببیند چرخ کجا ایستاده است
         setTimeout(function () {
           revealEl.classList.add("active");
           
-          // زمان نمایش جایزه (۱.۸ ثانیه)
           setTimeout(function () {
             revealEl.classList.remove("active");
             
             setTimeout(function () {
               showResult(r.prize);
-            }, 450); // هماهنگ با زمان محو شدن CSS
+            }, 450);
             
           }, reduceMotion ? 800 : 1800);
           
@@ -470,12 +453,12 @@
 
     if (win) {
       $("#r-title").textContent = "تبریک!";
-      $("#r-sub").textContent = state.name + " عزیز، شما برنده شدید!";
+      $("#r-sub").textContent = state.name + "شما برنده شدید!";
       $("#r-prize").textContent = prize;
     } else {
       $("#r-title").textContent = "از بازی شما متشکریم!";
-      $("#r-sub").textContent = state.name + " عزیز، امروز روز شما نیست...";
-      $("#r-prize").textContent = "این بار برنده نشدید";
+      $("#r-sub").textContent = state.name + " امیدواریم خرید خوبی را تجربه کرده باشید";
+      $("#r-prize").textContent = "روز خوبی داشته باشید";
     }
     show("result");
     if (win && !reduceMotion) confetti.start();
@@ -533,7 +516,6 @@
   // warm the config in the background so the wheel opens instantly
   ensureConfig();
 
-  // اگر فونت با تأخیر لود شد، چرخ را دوباره بکش تا برچسب‌ها با فونت فارسی رندر شوند
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function () {
       if (state.view === "wheel") drawWheel();
