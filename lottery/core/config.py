@@ -1,7 +1,7 @@
 from pathlib import Path
 import random
 
-APP_TITLE = "چرخ شانس A1"
+APP_TITLE = "gardone shans A1"
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DB_FILENAME = "lottery.db"
@@ -9,7 +9,6 @@ WEB_DIR = PROJECT_ROOT / "web"
 
 POOCH = "پوچ"
 
-# تعداد دقیق آیتم‌ها بر اساس تصویر
 GIFT_COUNTS = {
     "سکه طلا": 1,
     "بلور": 2,
@@ -23,11 +22,7 @@ GIFT_COUNTS = {
 
 
 def _shuffle_without_adjacent(counts, attempts=500):
-    """
-    آرایه‌ای می‌سازد که تعداد هر آیتم دقیقاً حفظ شود و هیچ دو آیتم
-    هم‌نامی کنار هم قرار نگیرد. چون گردونه است، اولین و آخرین خانه هم
-    همسایه محسوب می‌شوند.
-    """
+
     rng = random.SystemRandom()
     total = sum(counts.values())
 
@@ -37,7 +32,6 @@ def _shuffle_without_adjacent(counts, attempts=500):
 
         candidates = [name for name, count in remaining.items() if count > 0]
         rng.shuffle(candidates)
-        # آیتم‌های با تعداد بیشتر اول امتحان می‌شوند تا بن‌بست کمتر شود.
         candidates.sort(key=lambda name: remaining[name], reverse=True)
 
         for name in candidates:
@@ -67,7 +61,6 @@ def _shuffle_without_adjacent(counts, attempts=500):
 
 GIFTS = _shuffle_without_adjacent(GIFT_COUNTS)
 
-# Prize colours live ONLY on the wheel sectors.
 PRIZE_COLORS = {
     "کریستال": "#38B6F0",
     "بلور": "#A56BD1",
