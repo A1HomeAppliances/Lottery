@@ -73,7 +73,6 @@ class WebBridge:
             self._destroy(view)
 
     def refocus(self):
-        """بعد از resume شدن اپ، دوباره تمام‌صفحه را اعمال می‌کند."""
         if self._view is not None:
             self._reapply_fullscreen()
 
@@ -139,7 +138,6 @@ class WebBridge:
 
     # ---- fullscreen helpers -------------------------------------------
 
-    # ماسک‌ها برای سیستم‌یوآی قدیمی (API < 30)
     _UI_FULLSCREEN          = 0x00000004
     _UI_HIDE_NAVIGATION     = 0x00000200
     _UI_LAYOUT_FULLSCREEN   = 0x00000400
@@ -148,8 +146,6 @@ class WebBridge:
     _UI_IMMERSIVE_STICKY    = 0x00001000
 
     def _apply_fullscreen(self, activity):
-        """نوار وضعیت و نوار ناوبری را در حالت immersive sticky پنهان می‌کند.
-        باید فقط از روی UI thread صدا زده شود."""
         try:
             window = activity.getWindow()
             decor = window.getDecorView()
@@ -165,7 +161,6 @@ class WebBridge:
                     controller.hide(0x7)            # statusBars | navigationBars | captionBar
                     controller.setSystemBarsBehavior(1)  # BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             else:
-                # مسیر قدیمی
                 decor.setSystemUiVisibility(
                     self._UI_FULLSCREEN
                     | self._UI_HIDE_NAVIGATION
