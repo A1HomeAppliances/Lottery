@@ -46,8 +46,7 @@
     });
   }
 
-  // یک درخواست هم‌زمان، تا تغییرهای hash روی هم نیفتند
-  function call(method, params) {
+    function call(method, params) {
     chain = chain.then(function () { return rawCall(method, params); });
     return chain;
   }
