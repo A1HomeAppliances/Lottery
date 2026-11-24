@@ -16,7 +16,7 @@ requirements = python3, sqlite3, kivy==2.3.1, pyjnius, android
 
 orientation = all
 #orientation = portrait
-fullscreen = 0
+fullscreen = 1
 android.permissions = INTERNET
 android.archs = arm64-v8a, armeabi-v7a
 
