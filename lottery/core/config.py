@@ -1,7 +1,7 @@
 from pathlib import Path
 import random
 
-APP_TITLE = "gardone shans A1"
+APP_TITLE = "گردونه شانس A1"
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DB_FILENAME = "lottery.db"
