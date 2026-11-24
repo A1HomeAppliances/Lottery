@@ -12,7 +12,7 @@ POOCH = "پوچ"
 # تعداد دقیق آیتم‌ها بر اساس تصویر
 GIFT_COUNTS = {
     "سکه طلا": 1,
-    "شکر": 2,
+    "بلور": 2,
     "پوچ": 3,
     "کریستال": 2,
     "ساعت دیواری": 2,
@@ -70,7 +70,7 @@ GIFTS = _shuffle_without_adjacent(GIFT_COUNTS)
 # Prize colours live ONLY on the wheel sectors.
 PRIZE_COLORS = {
     "کریستال": "#38B6F0",
-    "شکر": "#A56BD1",
+    "بلور": "#A56BD1",
     "جام کریستالی": "#2BA89A",
     "سکه طلا": "#F2B632",
     "ساعت دیواری": "#E8605E",
