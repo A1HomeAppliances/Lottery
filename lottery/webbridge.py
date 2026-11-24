@@ -27,6 +27,7 @@ WebView = autoclass("android.webkit.WebView")
 WebViewClient = autoclass("android.webkit.WebViewClient")
 LayoutParams = autoclass("android.view.ViewGroup$LayoutParams")
 Color = autoclass("android.graphics.Color")
+BuildVersion = autoclass("android.os.Build$VERSION")
 
 _RPC = re.compile(r"#rpc/(\d+)/([A-Za-z0-9_-]*)$")
 
@@ -71,6 +72,11 @@ class WebBridge:
         if view is not None:
             self._destroy(view)
 
+    def refocus(self):
+        """بعد از resume شدن اپ، دوباره تمام‌صفحه را اعمال می‌کند."""
+        if self._view is not None:
+            self._reapply_fullscreen()
+
     # ---- polling -------------------------------------------------------
 
     def _tick(self, _dt):
@@ -104,6 +110,8 @@ class WebBridge:
     @run_on_ui_thread
     def _create(self, url):
         activity = PythonActivity.mActivity
+        self._apply_fullscreen(activity)
+
         view = WebView(activity)
 
         settings = view.getSettings()
@@ -118,12 +126,63 @@ class WebBridge:
         view.setFocusable(True)                 # keyboard / text fields
         view.setFocusableInTouchMode(True)
         view.setWebViewClient(WebViewClient())  # keep navigation in-app
+        try:
+            view.setFitsSystemWindows(False)
+        except Exception:
+            pass
         WebView.setWebContentsDebuggingEnabled(True)   # chrome://inspect
 
         view.loadUrl(url)
         activity.addContentView(view, LayoutParams(-1, -1))
         view.requestFocus()
         self._view = view
+
+    # ---- fullscreen helpers -------------------------------------------
+
+    # ماسک‌ها برای سیستم‌یوآی قدیمی (API < 30)
+    _UI_FULLSCREEN          = 0x00000004
+    _UI_HIDE_NAVIGATION     = 0x00000200
+    _UI_LAYOUT_FULLSCREEN   = 0x00000400
+    _UI_LAYOUT_HIDE_NAV     = 0x00000002
+    _UI_LAYOUT_STABLE       = 0x00000100
+    _UI_IMMERSIVE_STICKY    = 0x00001000
+
+    def _apply_fullscreen(self, activity):
+        """نوار وضعیت و نوار ناوبری را در حالت immersive sticky پنهان می‌کند.
+        باید فقط از روی UI thread صدا زده شود."""
+        try:
+            window = activity.getWindow()
+            decor = window.getDecorView()
+
+            if BuildVersion.SDK_INT >= 30:
+                # مسیر مدرن (Android 11+)
+                try:
+                    window.setDecorFitsSystemWindows(False)
+                except Exception:
+                    pass
+                controller = window.getInsetsController()
+                if controller is not None:
+                    controller.hide(0x7)            # statusBars | navigationBars | captionBar
+                    controller.setSystemBarsBehavior(1)  # BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            else:
+                # مسیر قدیمی
+                decor.setSystemUiVisibility(
+                    self._UI_FULLSCREEN
+                    | self._UI_HIDE_NAVIGATION
+                    | self._UI_LAYOUT_FULLSCREEN
+                    | self._UI_LAYOUT_HIDE_NAV
+                    | self._UI_LAYOUT_STABLE
+                    | self._UI_IMMERSIVE_STICKY
+                )
+        except Exception:
+            log.exception("failed to enable immersive fullscreen")
+
+    @run_on_ui_thread
+    def _reapply_fullscreen(self):
+        try:
+            self._apply_fullscreen(PythonActivity.mActivity)
+        except Exception:
+            log.exception("fullscreen reapply failed")
 
     @run_on_ui_thread
     def _read_url(self, view):

@@ -40,6 +40,10 @@ class ShellApp(App):
     def on_pause(self):
         return True
 
+    def on_resume(self):
+        if getattr(self, "web", None) is not None:
+            self.web.refocus()
+
     def on_stop(self):
         self.web.close()
         self.backend.close()
