@@ -47,6 +47,7 @@ def createUser(invoiceID, username, firstname, lastname, phone, prize, played_at
         """, (invoiceID, username, firstname, lastname, phone, prize, played_at))
         connect().commit()
         logging.info(f"user: sort {firstname} {lastname} created on sqlite file\n prize: {prize}, player at {played_at}")
+        return True
 
     except sqlite3.Error as ERROR:
         logging.exception("!User Create Faild!")
