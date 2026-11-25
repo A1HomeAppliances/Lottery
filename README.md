@@ -9,6 +9,8 @@ The app targets **Android** (a Kivy shell hosting a full-screen `WebView`) and
 also runs in a browser for **desktop preview**.
 
 ---
+# NEXT UPDATE (V1.5.5): 
+
 **Creating Database panel for manage lottery data**
 
 ## Architecture
