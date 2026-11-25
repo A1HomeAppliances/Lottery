@@ -36,6 +36,14 @@ class LotteryDatabase:
         self.connection.execute(self.SCHEMA.format(name="lottery"))
         self._add_missing_columns()
 
+        # --- Admin Config Table ---
+        self.connection.execute("""
+            CREATE TABLE IF NOT EXISTS admin_config (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+
         if self._username_is_unique():
             self._rebuild_table()
 
@@ -142,6 +150,19 @@ class LotteryDatabase:
         )
         self.connection.commit()
         return cursor.rowcount == 1
+
+    # --- Admin Methods ---
+
+    def get_admin_config(self, key):
+        row = self.connection.execute("SELECT value FROM admin_config WHERE key = ?", (key,)).fetchone()
+        return row["value"] if row else None
+
+    def set_admin_config(self, key, value):
+        self.connection.execute(
+            "INSERT INTO admin_config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            (key, value)
+        )
+        self.connection.commit()
 
     def close(self):
         self.connection.close()

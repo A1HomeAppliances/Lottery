@@ -11,6 +11,17 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Offline icon sprite (no external files) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-gift" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+  </svg>
+
   <canvas id="confetti" aria-hidden="true"></canvas>
 
   <main id="app">
@@ -18,6 +29,17 @@
     <!-- ============ Login ============ -->
     <section class="view" id="view-login" data-view="login">
       <div class="login">
+        
+        <!-- 3-dot Menu -->
+        <div class="top-menu">
+          <button id="menuBtn" class="icon-btn" aria-label="منو">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+          </button>
+          <div id="dropdownMenu" class="dropdown-menu" hidden>
+            <button id="openAdminBtn">پنل مدیریت</button>
+          </div>
+        </div>
+
         <header class="brand">
           <h1>گردونه شانس <span class="brand-mark">A1</span></h1>
           <p>قرعه‌کشی مشتریان</p>
@@ -68,7 +90,6 @@
             <canvas id="wheel" aria-label="گردونهٔ جوایز" role="img"></canvas>
             <span class="hub" aria-hidden="true">A1</span>
           </div>
-
           
           <div class="prize-reveal" id="prizeReveal" aria-hidden="true">
             <div class="prize-reveal-inner">
@@ -124,6 +145,113 @@
 
           <button id="again" class="btn" type="button">بازی با فاکتور جدید</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ Admin Login ============ -->
+    <section class="view" id="view-admin-login" data-view="admin-login" hidden>
+      <div class="admin-login-wrap glass-card squircle">
+        <div class="admin-icon">
+          <svg viewBox="0 0 24 24" width="44" height="44" stroke="var(--gold)" stroke-width="1.5" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h2>پنل مدیریت</h2>
+        <p class="sub">لطفاً وارد حساب کاربری خود شوید</p>
+
+        <div id="adminSetupSection" class="setup-note" hidden>
+          اولین ورود: یک نام کاربری (حداقل ۴ کاراکتر) و رمز عبور قوی (حداقل ۸ کاراکتر) تعیین کنید.
+        </div>
+
+        <form id="adminAuthForm" class="admin-form" novalidate>
+          <div class="input-group squircle">
+            <input type="text" id="adminUser" placeholder="نام کاربری" dir="ltr"
+                   autocomplete="off" autocapitalize="off" spellcheck="false">
+            <svg class="input-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="input-group squircle">
+            <input type="password" id="adminPass" placeholder="رمز عبور" dir="ltr" autocomplete="off">
+            <svg class="input-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <p id="adminAuthError" class="error" role="alert"></p>
+          <button type="submit" class="btn squircle" id="adminAuthBtn">ورود</button>
+        </form>
+
+        <button id="backToLogin" class="btn ghost squircle" type="button">بازگشت</button>
+        <p class="foot-admin">برای امنیت بیشتر، از رمز عبور قوی استفاده کنید.</p>
+      </div>
+    </section>
+
+    <!-- ============ Admin Dashboard ============ -->
+    <section class="view" id="view-admin-dashboard" data-view="admin-dashboard" hidden>
+      <div class="admin-dashboard">
+        
+        <header class="dash-header">
+          <div class="dash-title">
+            <svg viewBox="0 0 24 24" width="28" height="28" stroke="var(--gold)" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <h2>پنل مدیریت</h2>
+          </div>
+          <button id="adminLogoutBtn" class="icon-btn" aria-label="خروج">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--red)" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </header>
+
+        <div class="stats-grid">
+          <div class="stat-card glass-card squircle">
+            <span class="stat-icon"><svg class="icon"><use href="#i-gift"/></svg></span>
+            <h3 id="statWins">۰</h3>
+            <p>جوایز برده‌شده</p>
+          </div>
+          <div class="stat-card glass-card squircle">
+            <span class="stat-icon"><svg class="icon"><use href="#i-users"/></svg></span>
+            <h3 id="statPlayed">۰</h3>
+            <p>بازی‌شده</p>
+          </div>
+          <div class="stat-card glass-card squircle">
+            <span class="stat-icon"><svg class="icon"><use href="#i-clock"/></svg></span>
+            <h3 id="statPending">۰</h3>
+            <p>در انتظار چرخش</p>
+          </div>
+          <div class="stat-card glass-card squircle">
+            <span class="stat-icon stat-ok"><svg class="icon"><use href="#i-check"/></svg></span>
+            <h3 id="statRate" class="stat-ok">۰٪</h3>
+            <p>درصد برد</p>
+          </div>
+        </div>
+
+        <section class="glass-card squircle prizes-card" aria-labelledby="prizesTitle">
+          <h3 id="prizesTitle"><svg class="icon sm"><use href="#i-award"/></svg> جوایز داده‌شده</h3>
+          <ul id="prizeList" class="prize-list"></ul>
+        </section>
+
+        <div class="search-bar squircle">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="adminSearch" placeholder="جستجو در کاربران...">
+        </div>
+
+        <div class="table-wrap glass-card squircle">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>نام و نام خانوادگی</th>
+                <th>شماره موبایل</th>
+                <th>شماره فاکتور</th>
+                <th>جایزه</th>
+                <th>وضعیت</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <!-- JS will populate -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <span id="pageInfo">-</span>
+          <div id="pageButtons" class="page-buttons">
+            <!-- JS will populate -->
+          </div>
+        </div>
+
       </div>
     </section>
 

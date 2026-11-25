@@ -2,7 +2,16 @@
   "use strict";
 
   var $ = function (s) { return document.querySelector(s); };
-  var state = { cfg: null, name: "", invoice: 0, busy: false, view: "login" };
+  var state = { 
+    cfg: null, 
+    name: "", 
+    invoice: 0, 
+    busy: false, 
+    view: "login", 
+    adminToken: null, 
+    adminPage: 1, 
+    adminSearch: "" 
+  };
   var reduceMotion = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -46,7 +55,7 @@
     });
   }
 
-    function call(method, params) {
+  function call(method, params) {
     chain = chain.then(function () { return rawCall(method, params); });
     return chain;
   }
@@ -128,6 +137,223 @@
     if (revealEl) revealEl.classList.remove("active");
     show("login");
   }
+
+  /* =====================  3-dot Menu ===================== */
+  var menuBtn = $("#menuBtn");
+  var dropdownMenu = $("#dropdownMenu");
+  var openAdminBtn = $("#openAdminBtn");
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      dropdownMenu.hidden = !dropdownMenu.hidden;
+    });
+    document.addEventListener("click", function () {
+      if (!dropdownMenu.hidden) dropdownMenu.hidden = true;
+    });
+  }
+
+  openAdminBtn.addEventListener("click", function () {
+    dropdownMenu.hidden = true;
+    checkAdminStatus();
+  });
+
+  function checkAdminStatus() {
+    call("admin_status").then(function (r) {
+      if (r.ok) {
+        if (!r.initialized) {
+          $("#adminSetupSection").hidden = false;
+          $("#adminAuthBtn").textContent = "راه‌اندازی و ورود";
+        } else {
+          $("#adminSetupSection").hidden = true;
+          $("#adminAuthBtn").textContent = "ورود";
+        }
+        show("admin-login");
+        $("#adminUser").value = "";
+        $("#adminPass").value = "";
+        $("#adminAuthError").textContent = "";
+      }
+    });
+  }
+
+  /* =====================  Admin Auth  ===================== */
+  var adminAuthForm = $("#adminAuthForm");
+  adminAuthForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var user = $("#adminUser").value;
+    var pass = $("#adminPass").value;
+    var btn = $("#adminAuthBtn");
+    var errEl = $("#adminAuthError");
+    
+    btn.disabled = true;
+    errEl.textContent = "";
+
+    var method = $("#adminSetupSection").hidden ? "admin_login" : "admin_setup";
+    
+    call(method, { username: user, password: pass }).then(function (r) {
+      btn.disabled = false;
+      if (!r.ok) {
+        errEl.textContent = r.error;
+        return;
+      }
+      
+      if (method === "admin_setup") {
+        call("admin_login", { username: user, password: pass }).then(function (loginRes) {
+          if (loginRes.ok) {
+            state.adminToken = loginRes.token;
+            loadAdminDashboard();
+          }
+        });
+      } else {
+        state.adminToken = r.token;
+        loadAdminDashboard();
+      }
+    });
+  });
+
+  $("#backToLogin").addEventListener("click", function () {
+    show("login");
+  });
+
+  /* =====================  Admin Dashboard  ===================== */
+  var PER_PAGE = 10;
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  }
+  function fa(n) { return Number(n).toLocaleString("fa-IR"); }
+  function icon(id) {
+    return '<svg class="icon sm"><use href="#' + id + '"/></svg>';
+  }
+
+  function loadAdminDashboard() {
+    state.adminPage = 1;
+    state.adminSearch = "";
+    $("#adminSearch").value = "";
+    show("admin-dashboard");
+    fetchDashboardData();
+  }
+
+  function renderPrizes(prizes) {
+    var list = $("#prizeList");
+    list.innerHTML = "";
+    if (!prizes.length) {
+      list.appendChild(el("li", "prize-empty", "هنوز جایزه‌ای برده نشده است."));
+      return;
+    }
+    var max = prizes[0].count || 1;
+    prizes.forEach(function (p) {
+      var color = (state.cfg && state.cfg.prizeColors[p.prize]) || "#888888";
+      var li = el("li", "prize-row");
+      var dot = el("span", "prize-dot");
+      dot.style.background = color;
+      var bar = el("span", "prize-bar");
+      var fill = document.createElement("i");
+      fill.style.width = Math.max(6, Math.round(p.count / max * 100)) + "%";
+      fill.style.background = color;
+      bar.appendChild(fill);
+      li.appendChild(dot);
+      li.appendChild(el("span", "prize-name", p.prize));
+      li.appendChild(el("span", "prize-count", fa(p.count)));
+      li.appendChild(bar);
+      list.appendChild(li);
+    });
+  }
+
+  function renderUsers(users, page) {
+    var tbody = $("#adminTableBody");
+    tbody.innerHTML = "";
+    if (!users.length) {
+      var empty = el("tr");
+      var c = el("td", "empty-cell", "موردی یافت نشد.");
+      c.colSpan = 6;
+      empty.appendChild(c);
+      tbody.appendChild(empty);
+      return;
+    }
+    users.forEach(function (u, i) {
+      var played = u.lottery_check === 1;
+      var won = played && u.prize !== state.cfg.pooch;
+      var row = el("tr");
+      row.appendChild(el("td", "", fa((page - 1) * PER_PAGE + i + 1)));
+      row.appendChild(el("td", "", ((u.first_name || "") + " " + (u.last_name || "")).trim() || "-"));
+      var ph = el("td", "", u.phone || "-"); ph.dir = "ltr"; row.appendChild(ph);
+      row.appendChild(el("td", "", String(u.factorID)));
+      row.appendChild(el("td", "", won ? u.prize : "-"));
+      var st = el("td");
+      st.appendChild(el("span",
+        "status-pill " + (played ? (won ? "status-win" : "status-used") : "status-pending"),
+        played ? (won ? "برنده" : "پوچ") : "در انتظار"));
+      row.appendChild(st);
+      tbody.appendChild(row);
+    });
+  }
+
+  function renderPager(r) {
+    var totalPages = Math.max(1, Math.ceil(r.total / PER_PAGE));
+    $("#pageInfo").textContent =
+      "صفحهٔ " + fa(r.page) + " از " + fa(totalPages) + " — " + fa(r.total) + " مورد";
+
+    var box = $("#pageButtons");
+    box.innerHTML = "";
+    var prev = el("button", "page-btn");
+    prev.type = "button"; prev.setAttribute("aria-label", "قبلی");
+    prev.innerHTML = icon("i-chev-r");
+    prev.disabled = r.page <= 1;
+    prev.onclick = function () { state.adminPage = r.page - 1; fetchDashboardData(); };
+    var next = el("button", "page-btn");
+    next.type = "button"; next.setAttribute("aria-label", "بعدی");
+    next.innerHTML = icon("i-chev-l");
+    next.disabled = r.page >= totalPages;
+    next.onclick = function () { state.adminPage = r.page + 1; fetchDashboardData(); };
+    box.appendChild(prev);
+    box.appendChild(next);
+  }
+
+  function fetchDashboardData() {
+    if (!state.adminToken) return;
+    ensureConfig().then(function () {
+      return call("admin_dashboard", {
+        token: state.adminToken, page: state.adminPage, search: state.adminSearch
+      });
+    }).then(function (r) {
+      if (!r.ok) {
+        if (r.error && r.error.indexOf("غیرمجاز") !== -1) {
+          state.adminToken = null;
+          show("login");
+        }
+        return;
+      }
+      state.adminPage = r.page;
+      $("#statWins").textContent = fa(r.stats.total_wins);
+      $("#statPlayed").textContent = fa(r.stats.total_played);
+      $("#statPending").textContent = fa(r.stats.total_pending);
+      $("#statRate").textContent = fa(r.stats.success_rate) + "٪";
+      renderPrizes(r.prizes);
+      renderUsers(r.users, r.page);
+      renderPager(r);
+    });
+  }
+
+  var searchTimeout;
+  $("#adminSearch").addEventListener("input", function (e) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function () {
+      state.adminSearch = e.target.value;
+      state.adminPage = 1;
+      fetchDashboardData();
+    }, 500);
+  });
+
+  $("#adminLogoutBtn").addEventListener("click", function () {
+    call("admin_logout", { token: state.adminToken }).then(function () {
+      state.adminToken = null;
+      show("login");
+    });
+  });
 
   /* =====================  wheel drawing  ===================== */
   var wheel = $("#wheel"), wrap = $("#wheelWrap"), board = $("#board");
@@ -236,6 +462,11 @@
       ctx.globalAlpha = gifts[i] === state.cfg.pooch ? 0.9 : 1;
       ctx.shadowColor = "rgba(0,0,0,.4)";
       ctx.shadowBlur = Math.max(1, fs * 0.18);
+      /* shrink long labels so they never cross the wheel edge or the hub */
+      var maxW = radius * 0.56, tw = ctx.measureText(gifts[i]).width;
+      if (tw > maxW) {
+        ctx.font = "700 " + Math.max(8, fs * maxW / tw) + "px " + CANVAS_FONT;
+      }
       ctx.fillText(gifts[i], 0, 0);
       ctx.restore();
     }
@@ -265,10 +496,14 @@
 
   function fitWheel() {
     if (state.view !== "wheel") return;
-    var w = board.clientWidth;
-    var pt = parseFloat(getComputedStyle(board).paddingTop) || 0;
-    var h = board.clientHeight - pt;
-    var s = Math.floor(Math.max(120, Math.min(w, h, 900)));
+    var cs = getComputedStyle(board);
+    var w = board.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    var h = board.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    /* 0.94: leave room for the glow/shadow so the wheel never touches the edges */
+    var s = Math.floor(Math.min(w, h, 900) * 0.94);
+    s = Math.max(120, s);
+    if (wrap.dataset.size === String(s)) return;     /* avoid redraw/ResizeObserver loops */
+    wrap.dataset.size = String(s);
     wrap.style.setProperty("--wheel", s + "px");
     drawWheel();
   }
@@ -452,7 +687,7 @@
 
     if (win) {
       $("#r-title").textContent = "تبریک!";
-      $("#r-sub").textContent = state.name + "شما برنده شدید!";
+      $("#r-sub").textContent = state.name + " شما برنده شدید!";
       $("#r-prize").textContent = prize;
     } else {
       $("#r-title").textContent = "از بازی شما متشکریم!";
@@ -509,10 +744,10 @@
   window.__back = function () {
     if (state.view === "wheel") { if (!state.busy) logout(); }
     else if (state.view === "result") logout();
+    else if (state.view === "admin-login" || state.view === "admin-dashboard") show("login");
     else call("exit");
   };
 
-  // warm the config in the background so the wheel opens instantly
   ensureConfig();
 
   if (document.fonts && document.fonts.ready) {
