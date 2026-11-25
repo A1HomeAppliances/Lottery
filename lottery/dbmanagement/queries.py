@@ -50,7 +50,33 @@ def createUser(invoiceID, username, firstname, lastname, phone, prize, played_at
         return True
 
     except sqlite3.Error as ERROR:
-        logging.exception("!User Create Faild!")
+        logging.exception(f"!User Create Faild! Error: {ERROR}")
+        return False
+
+    finally:
+        if connect():
+            connect().close()
+
+def editUser(invoiceID, username, firstname, lastname, phone, lottery_check, prize, played_at):
+    try:
+        connect().execute("""
+            UPDATE lottery SET (
+                factorID = ?, 
+                username = ?,   
+                firstname = ?, 
+                lastname = ?, 
+                phone = ?, 
+                lottery_check = ?, 
+                prize = ?, 
+                played_at = ?
+            ) WHERE factorID = ?
+        """, (invoiceID, username, firstname, lastname, phone, lottery_check, prize, played_at, invoiceID))
+        connect().commit()
+        logging.info(f"Update: Invoice {invoiceID} edited!")
+        return True
+
+    except sqlite3.Error as ERROR:
+        logging.exception(f"Edit user Faild! ERROR: {ERROR}")
         return False
 
     finally:
