@@ -662,8 +662,9 @@ h1, h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
-.dash-title { display: flex; align-items: center; gap: 12px; }
+.dash-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .dash-title h2 { font-size: 1.3rem; color: var(--text); }
 
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -787,6 +788,313 @@ h1, h2 {
   .admin-dashboard { padding-inline: 12px; }
   .admin-table th, .admin-table td { padding: 10px 8px; }
 }
+
+/* ============================================================
+   Admin CRUD — Create / Update / Delete UI
+   ============================================================ */
+
+.dash-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-sm {
+  width: auto;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: .85rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn.sm {
+  padding: 6px;
+  border-radius: 8px;
+}
+.icon-btn.sm .icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  vertical-align: 0;
+}
+.icon-btn.danger { color: var(--red); }
+.icon-btn.danger:hover {
+  background: rgba(230, 108, 112, .15);
+  color: var(--red);
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ---- Dialogs ---- */
+dialog.dialog-card {
+  border: 1px solid var(--hair);
+  border-radius: 24px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 0;
+  width: min(100% - 32px, 480px);
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .55);
+  font-family: var(--sans);
+}
+dialog.dialog-card::backdrop {
+  background: rgba(0, 0, 0, .6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--hair);
+}
+.dialog-header h2 {
+  font-size: 1.1rem;
+  color: var(--gold-light);
+  margin: 0;
+}
+
+.dialog-body {
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+.dialog-body p { margin: 0; line-height: 1.8; }
+.dialog-body .muted { color: var(--muted); font-size: .85rem; }
+
+.dialog-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--hair);
+}
+.dialog-footer .btn {
+  width: auto;
+  min-width: 100px;
+  padding: 0 20px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 400px) {
+  .field-row { grid-template-columns: 1fr; }
+}
+
+.field select {
+  width: 100%;
+  height: clamp(42px, 6.5vh, 54px);
+  padding: 0 12px;
+  font: inherit;
+  font-size: clamp(.92rem, 2vh, 1rem);
+  color: var(--text);
+  background: var(--input);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-input);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: right;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.field select:hover { border-color: var(--hair-strong); }
+.field select:focus {
+  border-color: var(--gold);
+  background: #1d2230;
+  box-shadow: 0 0 0 3px rgba(232, 184, 90, .16);
+}
+
+.btn.danger {
+  background: linear-gradient(180deg, #f08a8d, var(--red));
+  color: #fff;
+}
+.btn.danger:hover { filter: brightness(1.06); }
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: .9rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  opacity: 0;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 100;
+  pointer-events: none;
+  max-width: 90vw;
+  text-align: center;
+  font-family: var(--sans);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   Admin — Wheel Items Management
+   ============================================================ */
+.wheel-config-card {
+  padding: 16px;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.card-header-row h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wheel-item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.wheel-item-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .02);
+  border: 1px solid var(--hair);
+  font-size: .9rem;
+}
+.wheel-item-row:hover {
+  background: rgba(255, 255, 255, .04);
+}
+
+.wheel-item-swatches {
+  display: inline-flex;
+  gap: 2px;
+}
+.wheel-item-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  display: inline-block;
+}
+
+.wheel-item-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.wheel-item-badge {
+  font-size: .7rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(232, 184, 90, .18);
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.wheel-item-count {
+  color: var(--gold-light);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 42px;
+  text-align: center;
+}
+
+.icon-btn.locked {
+  opacity: .3;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.wheel-empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 16px;
+  font-size: .9rem;
+}
+
+.wheel-hint {
+  margin: 10px 0 0;
+  color: var(--muted-2);
+  font-size: .78rem;
+  line-height: 1.7;
+}
+
+/* Native <input type="color"> styling */
+.field input[type="color"] {
+  width: 100%;
+  height: clamp(42px, 6.5vh, 54px);
+  padding: 4px;
+  background: var(--input);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-input);
+  cursor: pointer;
+}
+.field input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.field input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 10px;
+}
+.field input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 10px;
+}
+
+/* Styling for number inputs in dialogs */
+.field input[type="number"] {
+  width: 100%;
+  height: clamp(42px, 6.5vh, 54px);
+  padding: 0 12px;
+  font: inherit;
+  font-size: clamp(.92rem, 2vh, 1rem);
+  color: var(--text);
+  background: var(--input);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-input);
+  outline: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.field input[type="number"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(232, 184, 90, .16);
+}
+
+
 
 /* ============ Responsive ============ */
 @media (min-width: 880px) and (min-height: 520px) {
