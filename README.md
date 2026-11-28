@@ -11,7 +11,7 @@ also runs in a browser for **desktop preview**.
 ---
 # NEXT UPDATE (V1.5.5): 
 
-**comming soon...**
+**README.md update for new version in comming...**
 
 ## Architecture
 
