@@ -40,5 +40,4 @@ lottery/*.db
 Thumbs.db
 
 # BACKUPS
-lottery/backup2/
-lottery/bakup/
+lottery/backup*/

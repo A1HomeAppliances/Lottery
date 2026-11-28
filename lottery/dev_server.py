@@ -47,8 +47,8 @@ class Handler(SimpleHTTPRequestHandler):
 def main(open_browser=True):
     Handler.backend = Backend(PROJECT_ROOT / DB_FILENAME)
     handler = partial(Handler, directory=str(WEB_DIR))
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), handler)
-    url = f"http://127.0.0.1:{PORT}/"
+    server = ThreadingHTTPServer(("0.0.0.0", PORT), handler)
+    url = f"http://0.0.0.0:{PORT}/"
     print(f"A1 Lucky Spin dev server -> {url}   (Ctrl+C to stop)")
     if open_browser:
         webbrowser.open(url)
